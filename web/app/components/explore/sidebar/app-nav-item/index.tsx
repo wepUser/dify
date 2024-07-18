@@ -1,12 +1,13 @@
 'use client'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useHover } from 'ahooks'
 import s from './style.module.css'
 import cn from '@/utils/classnames'
 import ItemOperation from '@/app/components/explore/item-operation'
 import AppIcon from '@/app/components/base/app-icon'
+import { isConsolePage } from '@/utils/routerJupgement'
 
 export type IAppNavItemProps = {
   isMobile: boolean
@@ -33,8 +34,10 @@ export default function AppNavItem({
   uninstallable,
   onDelete,
 }: IAppNavItemProps) {
+  const applyType = isConsolePage(usePathname())
+  const [isConsole] = useState(applyType)
   const router = useRouter()
-  const url = `/explore/installed/${id}`
+  const url = `/${isConsole ? 'explore' : 'brain'}/installed/${id}`
   const ref = useRef(null)
   const isHovering = useHover(ref)
   return (

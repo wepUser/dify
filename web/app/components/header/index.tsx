@@ -1,8 +1,8 @@
 'use client'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useBoolean } from 'ahooks'
-import { useSelectedLayoutSegment } from 'next/navigation'
+import { usePathname, useSelectedLayoutSegment } from 'next/navigation'
 import { Bars3Icon } from '@heroicons/react/20/solid'
 import HeaderBillingBtn from '../billing/header-billing-btn'
 import AccountDropdown from './account-dropdown'
@@ -18,7 +18,7 @@ import LogoSite from '@/app/components/base/logo/logo-site'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { useProviderContext } from '@/context/provider-context'
 import { useModalContext } from '@/context/modal-context'
-
+import { isConsolePage } from '@/utils/routerJupgement'
 const navClassName = `
   flex items-center relative mr-0 sm:mr-3 px-3 h-8 rounded-xl
   font-medium text-sm
@@ -26,6 +26,9 @@ const navClassName = `
 `
 
 const Header = () => {
+  const pathname = usePathname()
+  const applyType = isConsolePage(pathname)
+  const [isConsole, setIsConsole] = useState(applyType)
   const { isCurrentWorkspaceEditor, isCurrentWorkspaceDatasetOperator } = useAppContext()
 
   const selectedSegment = useSelectedLayoutSegment()
@@ -46,6 +49,10 @@ const Header = () => {
     hideNavMenu()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSegment])
+  useEffect(() => {
+    const applyType = isConsolePage(pathname)
+    setIsConsole(applyType)
+  }, [pathname])
   return (
     <div className='flex flex-1 items-center justify-between px-4'>
       <div className='flex items-center'>
@@ -62,22 +69,22 @@ const Header = () => {
           {/* <GithubStar /> */}
         </>}
       </div>
-      {/* {isMobile && ( */}
-      {/*  <div className='flex'> */}
-      {/*    <Link href="/apps" className='flex items-center mr-4'> */}
-      {/*      <LogoSite /> */}
-      {/*    </Link> */}
-      {/*    /!* <GithubStar /> *!/ */}
-      {/*  </div> */}
-      {/* )} */}
-      {/* {!isMobile && ( */}
-      {/*  <div className='flex items-center'> */}
-      {/*    {!isCurrentWorkspaceDatasetOperator && <ExploreNav className={navClassName} />} */}
-      {/*    {!isCurrentWorkspaceDatasetOperator && <AppNav />} */}
-      {/*    {(isCurrentWorkspaceEditor || isCurrentWorkspaceDatasetOperator) && <DatasetNav />} */}
-      {/*    {!isCurrentWorkspaceDatasetOperator && <ToolsNav className={navClassName} />} */}
-      {/*  </div> */}
-      {/* )} */}
+      {isMobile && (
+        <div className='flex'>
+          <Link href="/apps" className='flex items-center mr-4'>
+            <LogoSite />
+          </Link>
+          {/* <GithubStar /> */}
+        </div>
+      )}
+      {!isMobile && isConsole && (
+        <div className='flex items-center'>
+          {/* {!isCurrentWorkspaceDatasetOperator && <ExploreNav className={navClassName} />} */}
+          {!isCurrentWorkspaceDatasetOperator && <AppNav />}
+          {(isCurrentWorkspaceEditor || isCurrentWorkspaceDatasetOperator) && <DatasetNav />}
+          {!isCurrentWorkspaceDatasetOperator && <ToolsNav className={navClassName} />}
+        </div>
+      )}
       <div className='flex items-center flex-shrink-0'>
         {/* <EnvNav /> */}
         {enableBilling && (

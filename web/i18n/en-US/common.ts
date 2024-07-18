@@ -131,6 +131,8 @@ const translation = {
     community: 'Community',
     about: 'About',
     logout: 'Log out',
+    console: 'Console',
+    frontEnd: 'front desk',
   },
   settings: {
     accountGroup: 'ACCOUNT',

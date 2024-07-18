@@ -131,6 +131,8 @@ const translation = {
     community: '社区',
     about: '关于',
     logout: '登出',
+    console: '控制台',
+    frontEnd: '前台',
   },
   settings: {
     accountGroup: '账户',

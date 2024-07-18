@@ -49,7 +49,7 @@ const translation = {
     empty: {
       title: 'There is no documentation yet',
       upload: {
-        tip: 'You can upload files, sync from the website, or from webb apps like Notion, GitHub, etc.',
+        tip: 'You can upload files',
       },
       sync: {
         tip: 'Dify will periodically download files from your Notion and complete processing.',

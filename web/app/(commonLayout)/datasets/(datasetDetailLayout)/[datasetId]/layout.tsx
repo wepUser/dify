@@ -33,7 +33,6 @@ import FloatPopoverContainer from '@/app/components/base/float-popover-container
 import DatasetDetailContext from '@/context/dataset-detail'
 import { DataSourceType } from '@/models/datasets'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
-import { LanguagesSupported } from '@/i18n/language'
 import { useStore } from '@/app/components/app/store'
 import { AiText, ChatBot, CuteRobote } from '@/app/components/base/icons/src/vender/solid/communication'
 import { Route } from '@/app/components/base/icons/src/vender/solid/mapsAndTravel'
@@ -162,18 +161,18 @@ const ExtraInfo = ({ isMobile, relatedApps }: IExtraInfoProps) => {
             </div>
           </div>
           <div className='mt-2 text-xs text-gray-500'>{t('common.datasetMenus.emptyTip')}</div>
-          <a
-            className='inline-flex items-center mt-2 text-xs cursor-pointer text-primary-600'
-            href={
-              locale === LanguagesSupported[1]
-                ? 'https://docs.dify.ai/v/zh-hans/guides/application-design/prompt-engineering'
-                : 'https://docs.dify.ai/user-guide/creating-dify-apps/prompt-engineering'
-            }
-            target='_blank' rel='noopener noreferrer'
-          >
-            <BookOpenIcon className='mr-1' />
-            {t('common.datasetMenus.viewDoc')}
-          </a>
+          {/* <a */}
+          {/*  className='inline-flex items-center mt-2 text-xs cursor-pointer text-primary-600' */}
+          {/*  href={ */}
+          {/*    locale === LanguagesSupported[1] */}
+          {/*      ? 'https://docs.dify.ai/v/zh-hans/guides/application-design/prompt-engineering' */}
+          {/*      : 'https://docs.dify.ai/user-guide/creating-dify-apps/prompt-engineering' */}
+          {/*  } */}
+          {/*  target='_blank' rel='noopener noreferrer' */}
+          {/* > */}
+          {/*  <BookOpenIcon className='mr-1' /> */}
+          {/*  {t('common.datasetMenus.viewDoc')} */}
+          {/* </a> */}
         </div>
       </FloatPopoverContainer>
     )}

@@ -96,6 +96,7 @@ const NormalForm = () => {
       })
       if (res.result === 'success') {
         localStorage.setItem('console_token', res.data)
+        localStorage.setItem('apply_type', 'frontEnd')
         router.replace('/brain/apps')
       }
       else {
@@ -267,21 +268,21 @@ const NormalForm = () => {
             </>
           }
           {/*  agree to our Terms and Privacy Policy. */}
-          <div className="block mt-2 text-xs text-center text-gray-600 w-hull">
-            {t('login.tosDesc')}
-            &nbsp;
-            <Link
-              className='text-primary-600'
-              target='_blank' rel='noopener noreferrer'
-              href='https://dify.ai/terms'
-            >{t('login.tos')}</Link>
-            &nbsp;&&nbsp;
-            <Link
-              className='text-primary-600'
-              target='_blank' rel='noopener noreferrer'
-              href='https://dify.ai/privacy'
-            >{t('login.pp')}</Link>
-          </div>
+          {/* <div className="block mt-2 text-xs text-center text-gray-600 w-hull"> */}
+          {/*  {t('login.tosDesc')} */}
+          {/*  &nbsp; */}
+          {/*  <Link */}
+          {/*    className='text-primary-600' */}
+          {/*    target='_blank' rel='noopener noreferrer' */}
+          {/*    href='https://dify.ai/terms' */}
+          {/*  >{t('login.tos')}</Link> */}
+          {/*  &nbsp;&&nbsp; */}
+          {/*  <Link */}
+          {/*    className='text-primary-600' */}
+          {/*    target='_blank' rel='noopener noreferrer' */}
+          {/*    href='https://dify.ai/privacy' */}
+          {/*  >{t('login.pp')}</Link> */}
+          {/* </div> */}
 
           {IS_CE_EDITION && <div className="block mt-2 text-xs text-center text-gray-600 w-hull">
             {t('login.goToInit')}
