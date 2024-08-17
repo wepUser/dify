@@ -1,11 +1,10 @@
-from collections.abc import Mapping, Sequence
 from os import path
-from typing import Any, cast
+from typing import Optional, cast
 
-from core.app.segments import parser
 from core.callback_handler.workflow_tool_callback_handler import DifyWorkflowCallbackHandler
 from core.file.file_obj import FileTransferMethod, FileType, FileVar
 from core.tools.entities.tool_entities import ToolInvokeMessage, ToolParameter
+from core.tools.tool.tool import Tool
 from core.tools.tool_engine import ToolEngine
 from core.tools.tool_manager import ToolManager
 from core.tools.utils.message_transformer import ToolFileMessageTransformer
@@ -21,7 +20,6 @@ class ToolNode(BaseNode):
     """
     Tool Node
     """
-
     _node_data_cls = ToolNodeData
     _node_type = NodeType.TOOL
 
@@ -52,24 +50,23 @@ class ToolNode(BaseNode):
                 },
                 error=f'Failed to get tool runtime: {str(e)}'
             )
-
+        
         # get parameters
-        tool_parameters = tool_runtime.get_runtime_parameters() or []
-        parameters = self._generate_parameters(tool_parameters=tool_parameters, variable_pool=variable_pool, node_data=node_data)
-        parameters_for_log = self._generate_parameters(tool_parameters=tool_parameters, variable_pool=variable_pool, node_data=node_data, for_log=True)
+        parameters = self._generate_parameters(variable_pool, node_data, tool_runtime)
 
         try:
             messages = ToolEngine.workflow_invoke(
                 tool=tool_runtime,
                 tool_parameters=parameters,
                 user_id=self.user_id,
+                workflow_id=self.workflow_id, 
                 workflow_tool_callback=DifyWorkflowCallbackHandler(),
                 workflow_call_depth=self.workflow_call_depth,
             )
         except Exception as e:
             return NodeRunResult(
                 status=WorkflowNodeExecutionStatus.FAILED,
-                inputs=parameters_for_log,
+                inputs=parameters,
                 metadata={
                     NodeRunMetadataKey.TOOL_INFO: tool_info
                 },
@@ -89,62 +86,57 @@ class ToolNode(BaseNode):
             metadata={
                 NodeRunMetadataKey.TOOL_INFO: tool_info
             },
-            inputs=parameters_for_log
+            inputs=parameters
         )
 
-    def _generate_parameters(
-        self,
-        *,
-        tool_parameters: Sequence[ToolParameter],
-        variable_pool: VariablePool,
-        node_data: ToolNodeData,
-        for_log: bool = False,
-    ) -> Mapping[str, Any]:
+    def _generate_parameters(self, variable_pool: VariablePool, node_data: ToolNodeData, tool_runtime: Tool) -> dict:
         """
-        Generate parameters based on the given tool parameters, variable pool, and node data.
-
-        Args:
-            tool_parameters (Sequence[ToolParameter]): The list of tool parameters.
-            variable_pool (VariablePool): The variable pool containing the variables.
-            node_data (ToolNodeData): The data associated with the tool node.
-
-        Returns:
-            Mapping[str, Any]: A dictionary containing the generated parameters.
-
+            Generate parameters
         """
-        tool_parameters_dictionary = {parameter.name: parameter for parameter in tool_parameters}
+        tool_parameters = tool_runtime.get_all_runtime_parameters()
+
+        def fetch_parameter(name: str) -> Optional[ToolParameter]:
+            return next((parameter for parameter in tool_parameters if parameter.name == name), None)
 
         result = {}
         for parameter_name in node_data.tool_parameters:
-            parameter = tool_parameters_dictionary.get(parameter_name)
+            parameter = fetch_parameter(parameter_name)
             if not parameter:
-                result[parameter_name] = None
                 continue
             if parameter.type == ToolParameter.ToolParameterType.FILE:
                 result[parameter_name] = [
                     v.to_dict() for v in self._fetch_files(variable_pool)
                 ]
             else:
-                tool_input = node_data.tool_parameters[parameter_name]
-                if tool_input.type == 'variable':
-                    # TODO: check if the variable exists in the variable pool
-                    parameter_value = variable_pool.get(tool_input.value).value
-                else:
-                    segment_group = parser.convert_template(
-                        template=str(tool_input.value),
-                        variable_pool=variable_pool,
-                    )
-                    parameter_value = segment_group.log if for_log else segment_group.text
-                result[parameter_name] = parameter_value
+                input = node_data.tool_parameters[parameter_name]
+                if input.type == 'mixed':
+                    result[parameter_name] = self._format_variable_template(input.value, variable_pool)
+                elif input.type == 'variable':
+                    result[parameter_name] = variable_pool.get_variable_value(input.value)
+                elif input.type == 'constant':
+                    result[parameter_name] = input.value
 
         return result
-
+    
+    def _format_variable_template(self, template: str, variable_pool: VariablePool) -> str:
+        """
+        Format variable template
+        """
+        inputs = {}
+        template_parser = VariableTemplateParser(template)
+        for selector in template_parser.extract_variable_selectors():
+            inputs[selector.variable] = variable_pool.get_variable_value(selector.value_selector)
+        
+        return template_parser.format(inputs)
+    
     def _fetch_files(self, variable_pool: VariablePool) -> list[FileVar]:
-        # FIXME: ensure this is a ArrayVariable contains FileVariable.
-        variable = variable_pool.get(['sys', SystemVariable.FILES.value])
-        return [file_var.value for file_var in variable.value] if variable else []
+        files = variable_pool.get_variable_value(['sys', SystemVariable.FILES.value])
+        if not files:
+            return []
+        
+        return files
 
-    def _convert_tool_messages(self, messages: list[ToolInvokeMessage]):
+    def _convert_tool_messages(self, messages: list[ToolInvokeMessage]) -> tuple[str, list[FileVar]]:
         """
         Convert ToolInvokeMessages into tuple[plain_text, files]
         """
@@ -175,14 +167,13 @@ class ToolNode(BaseNode):
                 ext = path.splitext(url)[1]
                 mimetype = response.meta.get('mime_type', 'image/jpeg')
                 filename = response.save_as or url.split('/')[-1]
-                transfer_method = response.meta.get('transfer_method', FileTransferMethod.TOOL_FILE)
 
                 # get tool file id
                 tool_file_id = url.split('/')[-1].split('.')[0]
                 result.append(FileVar(
                     tenant_id=self.tenant_id,
                     type=FileType.IMAGE,
-                    transfer_method=transfer_method,
+                    transfer_method=FileTransferMethod.TOOL_FILE,
                     url=url,
                     related_id=tool_file_id,
                     filename=filename,

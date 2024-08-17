@@ -2,6 +2,7 @@
 import type { MouseEventHandler } from 'react'
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import cn from 'classnames'
 import {
   RiCloseLine,
   RiQuestionLine,
@@ -9,7 +10,6 @@ import {
 import { useRouter } from 'next/navigation'
 import { useContext, useContextSelector } from 'use-context-selector'
 import s from './style.module.css'
-import cn from '@/utils/classnames'
 import AppsContext, { useAppContext } from '@/context/app-context'
 import { useProviderContext } from '@/context/provider-context'
 import { ToastContext } from '@/app/components/base/toast'

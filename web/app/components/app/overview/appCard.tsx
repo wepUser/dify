@@ -53,7 +53,7 @@ function AppCard({
 }: IAppCardProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const { isCurrentWorkspaceManager, isCurrentWorkspaceEditor } = useAppContext()
+  const { currentWorkspace, isCurrentWorkspaceManager, isCurrentWorkspaceEditor } = useAppContext()
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showEmbedded, setShowEmbedded] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
@@ -183,8 +183,9 @@ function AppCard({
                 <Confirm
                   type='warning'
                   title={t('appOverview.overview.appInfo.regenerate')}
-                  content={t('appOverview.overview.appInfo.regenerateNotice')}
+                  content={''}
                   isShow={showConfirmDelete}
+                  onClose={() => setShowConfirmDelete(false)}
                   onConfirm={() => {
                     onGenCode()
                     setShowConfirmDelete(false)

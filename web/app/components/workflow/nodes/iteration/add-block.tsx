@@ -3,6 +3,7 @@ import {
   useCallback,
 } from 'react'
 import produce from 'immer'
+import cn from 'classnames'
 import {
   RiAddLine,
 } from '@remixicon/react'
@@ -20,7 +21,6 @@ import {
 import { NODES_INITIAL_DATA } from '../../constants'
 import InsertBlock from './insert-block'
 import type { IterationNodeType } from './types'
-import cn from '@/utils/classnames'
 import BlockSelector from '@/app/components/workflow/block-selector'
 import { IterationStart } from '@/app/components/base/icons/src/vender/workflow'
 import type {

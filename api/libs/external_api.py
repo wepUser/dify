@@ -6,8 +6,6 @@ from flask_restful import Api, http_status_message
 from werkzeug.datastructures import Headers
 from werkzeug.exceptions import HTTPException
 
-from core.errors.error import AppInvokeQuotaExceededError
-
 
 class ExternalApi(Api):
 
@@ -42,13 +40,6 @@ class ExternalApi(Api):
             status_code = 400
             default_data = {
                 'code': 'invalid_param',
-                'message': str(e),
-                'status': status_code
-            }
-        elif isinstance(e, AppInvokeQuotaExceededError):
-            status_code = 429
-            default_data = {
-                'code': 'too_many_requests',
                 'message': str(e),
                 'status': status_code
             }

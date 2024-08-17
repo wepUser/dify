@@ -4,7 +4,6 @@ import {
   useCallback,
   useMemo,
 } from 'react'
-import { RiApps2AddLine } from '@remixicon/react'
 import { useNodes } from 'reactflow'
 import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
@@ -19,7 +18,6 @@ import {
 import type { StartNodeType } from '../nodes/start/types'
 import {
   useChecklistBeforePublish,
-  useIsChatMode,
   useNodesReadOnly,
   useNodesSyncDraft,
   useWorkflowMode,
@@ -32,8 +30,8 @@ import EditingTitle from './editing-title'
 import RunningTitle from './running-title'
 import RestoringTitle from './restoring-title'
 import ViewHistory from './view-history'
-import ChatVariableButton from './chat-variable-button'
-import EnvButton from './env-button'
+import Checklist from './checklist'
+import { Grid01 } from '@/app/components/base/icons/src/vender/line/layout'
 import Button from '@/app/components/base/button'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { publishWorkflow } from '@/service/workflow'
@@ -46,8 +44,10 @@ const Header: FC = () => {
   const appDetail = useAppStore(s => s.appDetail)
   const appSidebarExpand = useAppStore(s => s.appSidebarExpand)
   const appID = appDetail?.id
-  const isChatMode = useIsChatMode()
-  const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly()
+  const {
+    nodesReadOnly,
+    getNodesReadOnly,
+  } = useNodesReadOnly()
   const publishedAt = useStore(s => s.publishedAt)
   const draftUpdatedAt = useStore(s => s.draftUpdatedAt)
   const toolPublished = useStore(s => s.toolPublished)
@@ -167,29 +167,32 @@ const Header: FC = () => {
       </div>
       {
         normal && (
-          <div className='flex items-center gap-2'>
-            {isChatMode && <ChatVariableButton disabled={nodesReadOnly} />}
-            <EnvButton disabled={nodesReadOnly} />
-            <div className='w-[1px] h-3.5 bg-gray-200'></div>
+          <div className='flex items-center'>
             <RunAndHistory />
-            <Button className='text-components-button-secondary-text' onClick={handleShowFeatures}>
-              <RiApps2AddLine className='w-4 h-4 mr-1 text-components-button-secondary-text' />
+            <div className='mx-2 w-[1px] h-3.5 bg-gray-200'></div>
+            <Button
+              className='mr-2'
+              onClick={handleShowFeatures}
+            >
+              <Grid01 className='w-4 h-4 mr-1 text-gray-500' />
               {t('workflow.common.features')}
             </Button>
             <AppPublisher
               {...{
                 publishedAt,
                 draftUpdatedAt,
-                disabled: nodesReadOnly,
+                disabled: Boolean(getNodesReadOnly()),
                 toolPublished,
                 inputs: variables,
                 onRefreshData: handleToolConfigureUpdate,
                 onPublish,
                 onRestore: onStartRestoring,
                 onToggle: onPublisherToggle,
-                crossAxisOffset: 4,
+                crossAxisOffset: 53,
               }}
             />
+            <div className='mx-2 w-[1px] h-3.5 bg-gray-200'></div>
+            <Checklist disabled={nodesReadOnly} />
           </div>
         )
       }
@@ -212,8 +215,10 @@ const Header: FC = () => {
       {
         restoring && (
           <div className='flex items-center'>
-            <Button className='text-components-button-secondary-text' onClick={handleShowFeatures}>
-              <RiApps2AddLine className='w-4 h-4 mr-1 text-components-button-secondary-text' />
+            <Button
+              onClick={handleShowFeatures}
+            >
+              <Grid01 className='w-4 h-4 mr-1 text-gray-500' />
               {t('workflow.common.features')}
             </Button>
             <div className='mx-2 w-[1px] h-3.5 bg-gray-200'></div>

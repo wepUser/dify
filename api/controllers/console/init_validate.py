@@ -1,9 +1,8 @@
 import os
 
-from flask import session
+from flask import current_app, session
 from flask_restful import Resource, reqparse
 
-from configs import dify_config
 from libs.helper import str_len
 from models.model import DifySetup
 from services.account_service import TenantService
@@ -41,7 +40,7 @@ class InitValidateAPI(Resource):
         return {'result': 'success'}, 201
 
 def get_init_validate_status():
-    if dify_config.EDITION == 'SELF_HOSTED':
+    if current_app.config['EDITION'] == 'SELF_HOSTED':
         if os.environ.get('INIT_PASSWORD'):
             return session.get('is_init_validated') or DifySetup.query.first()
     

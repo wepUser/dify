@@ -19,29 +19,28 @@ class JSONDeleteTool(BuiltinTool):
         content = tool_parameters.get('content', '')
         if not content:
             return self.create_text_message('Invalid parameter content')
-
+        
         # Get query
         query = tool_parameters.get('query', '')
         if not query:
             return self.create_text_message('Invalid parameter query')
-
-        ensure_ascii = tool_parameters.get('ensure_ascii', True)
+        
         try:
-            result = self._delete(content, query, ensure_ascii)
+            result = self._delete(content, query)
             return self.create_text_message(str(result))
         except Exception as e:
             return self.create_text_message(f'Failed to delete JSON content: {str(e)}')
 
-    def _delete(self, origin_json: str, query: str, ensure_ascii: bool) -> str:
+    def _delete(self, origin_json: str, query: str) -> str:
         try:
             input_data = json.loads(origin_json)
             expr = parse('$.' + query.lstrip('$.'))  # Ensure query path starts with $
-
+            
             matches = expr.find(input_data)
-
+            
             if not matches:
-                return json.dumps(input_data, ensure_ascii=ensure_ascii)  # No changes if no matches found
-
+                return json.dumps(input_data, ensure_ascii=True)  # No changes if no matches found
+            
             for match in matches:
                 if isinstance(match.context.value, dict):
                     # Delete key from dictionary
@@ -54,7 +53,7 @@ class JSONDeleteTool(BuiltinTool):
                     parent = match.context.parent
                     if parent:
                         del parent.value[match.path.fields[-1]]
-
-            return json.dumps(input_data, ensure_ascii=ensure_ascii)
+            
+            return json.dumps(input_data, ensure_ascii=True)
         except Exception as e:
             raise Exception(f"Delete operation failed: {str(e)}")

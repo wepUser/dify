@@ -35,7 +35,7 @@ export const useChat = (
   const { notify } = useToastContext()
   const { handleRun } = useWorkflowRun()
   const hasStopResponded = useRef(false)
-  const conversationId = useRef('')
+  const connversationId = useRef('')
   const taskIdRef = useRef('')
   const [chatList, setChatList] = useState<ChatItem[]>(prevChatList || [])
   const chatListRef = useRef<ChatItem[]>(prevChatList || [])
@@ -100,7 +100,7 @@ export const useChat = (
   }, [handleResponding, stopChat])
 
   const handleRestart = useCallback(() => {
-    conversationId.current = ''
+    connversationId.current = ''
     taskIdRef.current = ''
     handleStop()
     const newChatList = config?.opening_statement
@@ -185,7 +185,7 @@ export const useChat = (
     handleResponding(true)
 
     const bodyParams = {
-      conversation_id: conversationId.current,
+      conversation_id: connversationId.current,
       ...params,
     }
     if (bodyParams?.files?.length) {
@@ -214,7 +214,7 @@ export const useChat = (
           }
 
           if (isFirstMessage && newConversationId)
-            conversationId.current = newConversationId
+            connversationId.current = newConversationId
 
           taskIdRef.current = taskId
           if (messageId)
@@ -403,7 +403,7 @@ export const useChat = (
   }, [handleRun, handleResponding, handleUpdateChatList, notify, t, updateCurrentQA, config.suggested_questions_after_answer?.enabled])
 
   return {
-    conversationId: conversationId.current,
+    conversationId: connversationId.current,
     chatList,
     handleSend,
     handleStop,

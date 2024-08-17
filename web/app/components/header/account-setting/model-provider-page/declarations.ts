@@ -12,7 +12,6 @@ export enum FormTypeEnum {
   secretInput = 'secret-input',
   select = 'select',
   radio = 'radio',
-  boolean = 'boolean',
   files = 'files',
 }
 

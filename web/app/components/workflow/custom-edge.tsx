@@ -3,6 +3,7 @@ import {
   useCallback,
   useState,
 } from 'react'
+import cn from 'classnames'
 import { intersection } from 'lodash-es'
 import type { EdgeProps } from 'reactflow'
 import {
@@ -21,7 +22,6 @@ import type {
   OnSelectBlock,
 } from './types'
 import { ITERATION_CHILDREN_Z_INDEX } from './constants'
-import cn from '@/utils/classnames'
 
 const CustomEdge = ({
   id,

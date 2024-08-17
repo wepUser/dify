@@ -208,8 +208,7 @@ def test__convert_to_knowledge_retrieval_node_for_chatbot():
             reranking_model={
                 'reranking_provider_name': 'cohere',
                 'reranking_model_name': 'rerank-english-v2.0'
-            },
-            reranking_enabled=True
+            }
         )
     )
 
@@ -252,8 +251,7 @@ def test__convert_to_knowledge_retrieval_node_for_workflow_app():
             reranking_model={
                 'reranking_provider_name': 'cohere',
                 'reranking_model_name': 'rerank-english-v2.0'
-            },
-            reranking_enabled=True
+            }
         )
     )
 

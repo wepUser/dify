@@ -1,6 +1,6 @@
 const translation = {
   common: {
-    welcome: '',
+    welcome: '이용해주셔서 감사합니다',
     appUnavailable: '앱을 사용할 수 없습니다',
     appUnkonwError: '앱을 사용할 수 없습니다',
   },

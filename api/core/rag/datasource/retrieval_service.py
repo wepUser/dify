@@ -6,13 +6,12 @@ from flask import Flask, current_app
 from core.rag.data_post_processor.data_post_processor import DataPostProcessor
 from core.rag.datasource.keyword.keyword_factory import Keyword
 from core.rag.datasource.vdb.vector_factory import Vector
-from core.rag.rerank.constants.rerank_mode import RerankMode
 from core.rag.retrieval.retrival_methods import RetrievalMethod
 from extensions.ext_database import db
 from models.dataset import Dataset
 
 default_retrieval_model = {
-    'search_method': RetrievalMethod.SEMANTIC_SEARCH.value,
+    'search_method': RetrievalMethod.SEMANTIC_SEARCH,
     'reranking_enable': False,
     'reranking_model': {
         'reranking_provider_name': '',
@@ -27,9 +26,7 @@ class RetrievalService:
 
     @classmethod
     def retrieve(cls, retrival_method: str, dataset_id: str, query: str,
-                 top_k: int, score_threshold: Optional[float] = .0,
-                 reranking_model: Optional[dict] = None, reranking_mode: Optional[str] = 'reranking_model',
-                 weights: Optional[dict] = None):
+                 top_k: int, score_threshold: Optional[float] = .0, reranking_model: Optional[dict] = None):
         dataset = db.session.query(Dataset).filter(
             Dataset.id == dataset_id
         ).first()
@@ -89,9 +86,8 @@ class RetrievalService:
             exception_message = ';\n'.join(exceptions)
             raise Exception(exception_message)
 
-        if retrival_method == RetrievalMethod.HYBRID_SEARCH.value:
-            data_post_processor = DataPostProcessor(str(dataset.tenant_id), reranking_mode,
-                                                    reranking_model, weights, False)
+        if retrival_method == RetrievalMethod.HYBRID_SEARCH:
+            data_post_processor = DataPostProcessor(str(dataset.tenant_id), reranking_model, False)
             all_documents = data_post_processor.invoke(
                 query=query,
                 documents=all_documents,
@@ -114,7 +110,7 @@ class RetrievalService:
                 )
 
                 documents = keyword.search(
-                    cls.escape_query_for_search(query),
+                    query,
                     top_k=top_k
                 )
                 all_documents.extend(documents)
@@ -136,7 +132,7 @@ class RetrievalService:
                 )
 
                 documents = vector.search_by_vector(
-                    cls.escape_query_for_search(query),
+                    query,
                     search_type='similarity_score_threshold',
                     top_k=top_k,
                     score_threshold=score_threshold,
@@ -146,10 +142,8 @@ class RetrievalService:
                 )
 
                 if documents:
-                    if reranking_model and retrival_method == RetrievalMethod.SEMANTIC_SEARCH.value:
-                        data_post_processor = DataPostProcessor(str(dataset.tenant_id),
-                                                                RerankMode.RERANKING_MODEL.value,
-                                                                reranking_model, None, False)
+                    if reranking_model and retrival_method == RetrievalMethod.SEMANTIC_SEARCH:
+                        data_post_processor = DataPostProcessor(str(dataset.tenant_id), reranking_model, False)
                         all_documents.extend(data_post_processor.invoke(
                             query=query,
                             documents=documents,
@@ -176,14 +170,12 @@ class RetrievalService:
                 )
 
                 documents = vector_processor.search_by_full_text(
-                    cls.escape_query_for_search(query),
+                    query,
                     top_k=top_k
                 )
                 if documents:
-                    if reranking_model and retrival_method == RetrievalMethod.FULL_TEXT_SEARCH.value:
-                        data_post_processor = DataPostProcessor(str(dataset.tenant_id),
-                                                                RerankMode.RERANKING_MODEL.value,
-                                                                reranking_model, None, False)
+                    if reranking_model and retrival_method == RetrievalMethod.FULL_TEXT_SEARCH:
+                        data_post_processor = DataPostProcessor(str(dataset.tenant_id), reranking_model, False)
                         all_documents.extend(data_post_processor.invoke(
                             query=query,
                             documents=documents,
@@ -194,7 +186,3 @@ class RetrievalService:
                         all_documents.extend(documents)
             except Exception as e:
                 exceptions.append(str(e))
-
-    @staticmethod
-    def escape_query_for_search(query: str) -> str:
-        return query.replace('"', '\\"')

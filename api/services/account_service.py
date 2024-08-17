@@ -6,10 +6,10 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from typing import Any, Optional
 
+from flask import current_app
 from sqlalchemy import func
 from werkzeug.exceptions import Unauthorized
 
-from configs import dify_config
 from constants.languages import language_timezone_mapping, languages
 from events.tenant_event import tenant_was_created
 from extensions.ext_redis import redis_client
@@ -47,7 +47,7 @@ class AccountService:
     )
 
     @staticmethod
-    def load_user(user_id: str) -> None | Account:
+    def load_user(user_id: str) -> Account:
         account = Account.query.filter_by(id=user_id).first()
         if not account:
             return None
@@ -55,7 +55,7 @@ class AccountService:
         if account.status in [AccountStatus.BANNED.value, AccountStatus.CLOSED.value]:
             raise Unauthorized("Account is banned or closed.")
 
-        current_tenant: TenantAccountJoin = TenantAccountJoin.query.filter_by(account_id=account.id, current=True).first()
+        current_tenant = TenantAccountJoin.query.filter_by(account_id=account.id, current=True).first()
         if current_tenant:
             account.current_tenant_id = current_tenant.tenant_id
         else:
@@ -80,7 +80,7 @@ class AccountService:
         payload = {
             "user_id": account.id,
             "exp": datetime.now(timezone.utc).replace(tzinfo=None) + exp,
-            "iss": dify_config.EDITION,
+            "iss": current_app.config['EDITION'],
             "sub": 'Console API Passport',
         }
 
@@ -370,28 +370,6 @@ class TenantService:
         return updated_accounts
 
     @staticmethod
-    def get_dataset_operator_members(tenant: Tenant) -> list[Account]:
-        """Get dataset admin members"""
-        query = (
-            db.session.query(Account, TenantAccountJoin.role)
-            .select_from(Account)
-            .join(
-                TenantAccountJoin, Account.id == TenantAccountJoin.account_id
-            )
-            .filter(TenantAccountJoin.tenant_id == tenant.id)
-            .filter(TenantAccountJoin.role == 'dataset_operator')
-        )
-
-        # Initialize an empty list to store the updated accounts
-        updated_accounts = []
-
-        for account, role in query:
-            account.role = role
-            updated_accounts.append(account)
-
-        return updated_accounts
-
-    @staticmethod
     def has_roles(tenant: Tenant, roles: list[TenantAccountJoinRole]) -> bool:
         """Check if user has any of the given roles for a tenant"""
         if not all(isinstance(role, TenantAccountJoinRole) for role in roles):
@@ -524,7 +502,7 @@ class RegisterService:
             TenantService.create_owner_tenant_if_not_exist(account)
 
             dify_setup = DifySetup(
-                version=dify_config.CURRENT_VERSION
+                version=current_app.config['CURRENT_VERSION']
             )
             db.session.add(dify_setup)
             db.session.commit()
@@ -559,7 +537,7 @@ class RegisterService:
 
             if open_id is not None or provider is not None:
                 AccountService.link_account_integrate(provider, open_id, account)
-            if dify_config.EDITION != 'SELF_HOSTED':
+            if current_app.config['EDITION'] != 'SELF_HOSTED':
                 tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
 
                 TenantService.create_tenant_member(tenant, account, role='owner')
@@ -623,7 +601,7 @@ class RegisterService:
             'email': account.email,
             'workspace_id': tenant.id,
         }
-        expiryHours = dify_config.INVITE_EXPIRY_HOURS
+        expiryHours = current_app.config['INVITE_EXPIRY_HOURS']
         redis_client.setex(
             cls._get_invitation_token_key(token),
             expiryHours * 60 * 60,

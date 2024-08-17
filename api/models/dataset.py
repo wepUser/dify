@@ -9,17 +9,16 @@ import re
 import time
 from json import JSONDecodeError
 
+from flask import current_app
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import JSONB
 
-from configs import dify_config
 from core.rag.retrieval.retrival_methods import RetrievalMethod
 from extensions.ext_database import db
 from extensions.ext_storage import storage
-
-from .account import Account
-from .model import App, Tag, TagBinding, UploadFile
-from .types import StringUUID
+from models import StringUUID
+from models.account import Account
+from models.model import App, Tag, TagBinding, UploadFile
 
 
 class Dataset(db.Model):
@@ -69,7 +68,7 @@ class Dataset(db.Model):
 
     @property
     def created_by_account(self):
-        return db.session.get(Account, self.created_by)
+        return Account.query.get(self.created_by)
 
     @property
     def latest_process_rule(self):
@@ -118,7 +117,7 @@ class Dataset(db.Model):
     @property
     def retrieval_model_dict(self):
         default_retrieval_model = {
-            'search_method': RetrievalMethod.SEMANTIC_SEARCH.value,
+            'search_method': RetrievalMethod.SEMANTIC_SEARCH,
             'reranking_enable': False,
             'reranking_model': {
                 'reranking_provider_name': '',
@@ -337,7 +336,7 @@ class Document(db.Model):
     @property
     def dataset_process_rule(self):
         if self.dataset_process_rule_id:
-            return db.session.get(DatasetProcessRule, self.dataset_process_rule_id)
+            return DatasetProcessRule.query.get(self.dataset_process_rule_id)
         return None
 
     @property
@@ -529,7 +528,7 @@ class DocumentSegment(db.Model):
             nonce = os.urandom(16).hex()
             timestamp = str(int(time.time()))
             data_to_sign = f"image-preview|{upload_file_id}|{timestamp}|{nonce}"
-            secret_key = dify_config.SECRET_KEY.encode() if dify_config.SECRET_KEY else b''
+            secret_key = current_app.config['SECRET_KEY'].encode()
             sign = hmac.new(secret_key, data_to_sign.encode(), hashlib.sha256).digest()
             encoded_sign = base64.urlsafe_b64encode(sign).decode()
 
@@ -561,7 +560,7 @@ class AppDatasetJoin(db.Model):
 
     @property
     def app(self):
-        return db.session.get(App, self.app_id)
+        return App.query.get(self.app_id)
 
 
 class DatasetQuery(db.Model):
@@ -631,17 +630,16 @@ class Embedding(db.Model):
     __tablename__ = 'embeddings'
     __table_args__ = (
         db.PrimaryKeyConstraint('id', name='embedding_pkey'),
-        db.UniqueConstraint('model_name', 'hash', 'provider_name', name='embedding_hash_idx'),
-        db.Index('created_at_idx', 'created_at')
+        db.UniqueConstraint('model_name', 'hash', 'provider_name', name='embedding_hash_idx')
     )
 
     id = db.Column(StringUUID, primary_key=True, server_default=db.text('uuid_generate_v4()'))
-    model_name = db.Column(db.String(255), nullable=False,
+    model_name = db.Column(db.String(40), nullable=False,
                            server_default=db.text("'text-embedding-ada-002'::character varying"))
     hash = db.Column(db.String(64), nullable=False)
     embedding = db.Column(db.LargeBinary, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.text('CURRENT_TIMESTAMP(0)'))
-    provider_name = db.Column(db.String(255), nullable=False,
+    provider_name = db.Column(db.String(40), nullable=False,
                               server_default=db.text("''::character varying"))
 
     def set_embedding(self, embedding_data: list[float]):
@@ -661,24 +659,7 @@ class DatasetCollectionBinding(db.Model):
 
     id = db.Column(StringUUID, primary_key=True, server_default=db.text('uuid_generate_v4()'))
     provider_name = db.Column(db.String(40), nullable=False)
-    model_name = db.Column(db.String(255), nullable=False)
+    model_name = db.Column(db.String(40), nullable=False)
     type = db.Column(db.String(40), server_default=db.text("'dataset'::character varying"), nullable=False)
     collection_name = db.Column(db.String(64), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text('CURRENT_TIMESTAMP(0)'))
-
-
-class DatasetPermission(db.Model):
-    __tablename__ = 'dataset_permissions'
-    __table_args__ = (
-        db.PrimaryKeyConstraint('id', name='dataset_permission_pkey'),
-        db.Index('idx_dataset_permissions_dataset_id', 'dataset_id'),
-        db.Index('idx_dataset_permissions_account_id', 'account_id'),
-        db.Index('idx_dataset_permissions_tenant_id', 'tenant_id')
-    )
-
-    id = db.Column(StringUUID, server_default=db.text('uuid_generate_v4()'), primary_key=True)
-    dataset_id = db.Column(StringUUID, nullable=False)
-    account_id = db.Column(StringUUID, nullable=False)
-    tenant_id = db.Column(StringUUID, nullable=False)
-    has_permission = db.Column(db.Boolean, nullable=False, server_default=db.text('true'))
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.text('CURRENT_TIMESTAMP(0)'))

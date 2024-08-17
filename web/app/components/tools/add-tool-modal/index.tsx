@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
 import produce from 'immer'
+import cn from 'classnames'
 import {
   RiAddLine,
   RiCloseLine,
@@ -13,7 +14,6 @@ import type { Collection, CustomCollectionBackend, Tool } from '../types'
 import Type from './type'
 import Category from './category'
 import Tools from './tools'
-import cn from '@/utils/classnames'
 import I18n from '@/context/i18n'
 import { getLanguage } from '@/i18n/language'
 import Drawer from '@/app/components/base/drawer'

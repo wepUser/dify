@@ -12,7 +12,6 @@ const translation = {
     cancel: 'Anulează',
     clear: 'Șterge',
     save: 'Salvează',
-    saveAndEnable: 'Salvează și Activează',
     edit: 'Editează',
     add: 'Adaugă',
     added: 'Adăugat',
@@ -119,7 +118,6 @@ const translation = {
   },
   userProfile: {
     settings: 'Setări',
-    emailSupport: 'Suport prin email',
     workspace: 'Spațiu de lucru',
     createWorkspace: 'Creează Spațiu de lucru',
     helpCenter: 'Ajutor',
@@ -408,7 +406,7 @@ const translation = {
     latestAvailable: 'Dify {{version}} este ultima versiune disponibilă.',
   },
   appMenus: {
-    overview: 'Monitorizare',
+    overview: 'Prezentare generală',
     promptEng: 'Orchestrare',
     apiAccess: 'Acces API',
     logAndAnn: 'Jurnale și Ann.',

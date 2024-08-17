@@ -1,9 +1,11 @@
-model: THUDM/glm-4-9b-chat
+model: zhipuai/glm4-9B-chat
 label:
-  en_US: THUDM/glm-4-9b-chat
+  en_US: zhipuai/glm4-9B-chat
 model_type: llm
 features:
+  - multi-tool-call
   - agent-thought
+  - stream-tool-call
 model_properties:
   mode: chat
   context_size: 32768
@@ -24,7 +26,7 @@ parameter_rules:
   - name: frequency_penalty
     use_template: frequency_penalty
 pricing:
-  input: '0'
-  output: '0'
+  input: '0.6'
+  output: '0.6'
   unit: '0.000001'
   currency: RMB

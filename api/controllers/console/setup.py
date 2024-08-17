@@ -1,9 +1,8 @@
 from functools import wraps
 
-from flask import request
+from flask import current_app, request
 from flask_restful import Resource, reqparse
 
-from configs import dify_config
 from libs.helper import email, get_remote_ip, str_len
 from libs.password import valid_password
 from models.model import DifySetup
@@ -18,7 +17,7 @@ from .wraps import only_edition_self_hosted
 class SetupApi(Resource):
 
     def get(self):
-        if dify_config.EDITION == 'SELF_HOSTED':
+        if current_app.config['EDITION'] == 'SELF_HOSTED':
             setup_status = get_setup_status()
             if setup_status:
                 return {
@@ -78,7 +77,7 @@ def setup_required(view):
 
 
 def get_setup_status():
-    if dify_config.EDITION == 'SELF_HOSTED':
+    if current_app.config['EDITION'] == 'SELF_HOSTED':
         return DifySetup.query.first()
     else:
         return True

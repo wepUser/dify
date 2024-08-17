@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, usePathname } from 'next/navigation'
+import cn from 'classnames'
 import {
   RiCloseLine,
   RiLoader2Line,
@@ -9,7 +10,6 @@ import Recorder from 'js-audio-recorder'
 import { useRafInterval } from 'ahooks'
 import { convertToMp3 } from './utils'
 import s from './index.module.css'
-import cn from '@/utils/classnames'
 import { StopCircle } from '@/app/components/base/icons/src/vender/solid/mediaAndDevices'
 import { audioToText } from '@/service/share'
 
@@ -152,10 +152,6 @@ const VoiceInput = ({
   useEffect(() => {
     initCanvas()
     handleStartRecord()
-    const recorderRef = recorder?.current
-    return () => {
-      recorderRef?.stop()
-    }
   }, [])
 
   const minutes = parseInt(`${parseInt(`${originDuration}`) / 60}`)

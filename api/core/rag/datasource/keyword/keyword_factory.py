@@ -1,6 +1,7 @@
 from typing import Any
 
-from configs import dify_config
+from flask import current_app
+
 from core.rag.datasource.keyword.jieba.jieba import Jieba
 from core.rag.datasource.keyword.keyword_base import BaseKeyword
 from core.rag.models.document import Document
@@ -13,8 +14,8 @@ class Keyword:
         self._keyword_processor = self._init_keyword()
 
     def _init_keyword(self) -> BaseKeyword:
-        config = dify_config
-        keyword_type = config.KEYWORD_STORE
+        config = current_app.config
+        keyword_type = config.get('KEYWORD_STORE')
 
         if not keyword_type:
             raise ValueError("Keyword store must be specified.")

@@ -59,7 +59,9 @@ class CodeNode(BaseNode):
         variables = {}
         for variable_selector in node_data.variables:
             variable = variable_selector.variable
-            value = variable_pool.get_any(variable_selector.value_selector)
+            value = variable_pool.get_variable_value(
+                variable_selector=variable_selector.value_selector
+            )
 
             variables[variable] = value
         # Run code
@@ -94,11 +96,8 @@ class CodeNode(BaseNode):
         :return:
         """
         if not isinstance(value, str):
-            if isinstance(value, type(None)):
-                return None
-            else:
-                raise ValueError(f"Output variable `{variable}` must be a string")
-        
+            raise ValueError(f"Output variable `{variable}` must be a string")
+
         if len(value) > MAX_STRING_LENGTH:
             raise ValueError(f'The length of output variable `{variable}` must be less than {MAX_STRING_LENGTH} characters')
 
@@ -112,10 +111,7 @@ class CodeNode(BaseNode):
         :return:
         """
         if not isinstance(value, int | float):
-            if isinstance(value, type(None)):
-                return None
-            else:
-                raise ValueError(f"Output variable `{variable}` must be a number")
+            raise ValueError(f"Output variable `{variable}` must be a number")
 
         if value > MAX_NUMBER or value < MIN_NUMBER:
             raise ValueError(f'Output variable `{variable}` is out of range, it must be between {MIN_NUMBER} and {MAX_NUMBER}.')
@@ -163,31 +159,28 @@ class CodeNode(BaseNode):
                 elif isinstance(output_value, list):
                     first_element = output_value[0] if len(output_value) > 0 else None
                     if first_element is not None:
-                        if isinstance(first_element, int | float) and all(value is None or isinstance(value, int | float) for value in output_value):
+                        if isinstance(first_element, int | float) and all(isinstance(value, int | float) for value in output_value):
                             for i, value in enumerate(output_value):
                                 self._check_number(
                                     value=value,
                                     variable=f'{prefix}.{output_name}[{i}]' if prefix else f'{output_name}[{i}]'
                                 )
-                        elif isinstance(first_element, str) and all(value is None or isinstance(value, str) for value in output_value):
+                        elif isinstance(first_element, str) and all(isinstance(value, str) for value in output_value):
                             for i, value in enumerate(output_value):
                                 self._check_string(
                                     value=value,
                                     variable=f'{prefix}.{output_name}[{i}]' if prefix else f'{output_name}[{i}]'
                                 )
-                        elif isinstance(first_element, dict) and all(value is None or isinstance(value, dict) for value in output_value):
+                        elif isinstance(first_element, dict) and all(isinstance(value, dict) for value in output_value):
                             for i, value in enumerate(output_value):
-                                if value is not None:
-                                    self._transform_result(
-                                        result=value,
-                                        output_schema=None,
-                                        prefix=f'{prefix}.{output_name}[{i}]' if prefix else f'{output_name}[{i}]',
-                                        depth=depth + 1
-                                    )
+                                self._transform_result(
+                                    result=value,
+                                    output_schema=None,
+                                    prefix=f'{prefix}.{output_name}[{i}]' if prefix else f'{output_name}[{i}]',
+                                    depth=depth + 1
+                                )
                         else:
                             raise ValueError(f'Output {prefix}.{output_name} is not a valid array. make sure all elements are of the same type.')
-                elif isinstance(output_value, type(None)):
-                    pass
                 else:
                     raise ValueError(f'Output {prefix}.{output_name} is not a valid type.')
                 
@@ -202,19 +195,16 @@ class CodeNode(BaseNode):
             if output_config.type == 'object':
                 # check if output is object
                 if not isinstance(result.get(output_name), dict):
-                    if isinstance(result.get(output_name), type(None)):
-                        transformed_result[output_name] = None
-                    else:
-                        raise ValueError(
-                            f'Output {prefix}{dot}{output_name} is not an object, got {type(result.get(output_name))} instead.'
-                        )
-                else:
-                    transformed_result[output_name] = self._transform_result(
-                        result=result[output_name],
-                        output_schema=output_config.children,
-                        prefix=f'{prefix}.{output_name}',
-                        depth=depth + 1
+                    raise ValueError(
+                        f'Output {prefix}{dot}{output_name} is not an object, got {type(result.get(output_name))} instead.'
                     )
+
+                transformed_result[output_name] = self._transform_result(
+                    result=result[output_name],
+                    output_schema=output_config.children,
+                    prefix=f'{prefix}.{output_name}',
+                    depth=depth + 1
+                )
             elif output_config.type == 'number':
                 # check if number available
                 transformed_result[output_name] = self._check_number(
@@ -230,80 +220,68 @@ class CodeNode(BaseNode):
             elif output_config.type == 'array[number]':
                 # check if array of number available
                 if not isinstance(result[output_name], list):
-                    if isinstance(result[output_name], type(None)):
-                        transformed_result[output_name] = None
-                    else:
-                        raise ValueError(
-                            f'Output {prefix}{dot}{output_name} is not an array, got {type(result.get(output_name))} instead.'
-                        )
-                else:
-                    if len(result[output_name]) > MAX_NUMBER_ARRAY_LENGTH:
-                        raise ValueError(
-                            f'The length of output variable `{prefix}{dot}{output_name}` must be less than {MAX_NUMBER_ARRAY_LENGTH} elements.'
-                        )
+                    raise ValueError(
+                        f'Output {prefix}{dot}{output_name} is not an array, got {type(result.get(output_name))} instead.'
+                    )
 
-                    transformed_result[output_name] = [
-                        self._check_number(
-                            value=value,
-                            variable=f'{prefix}{dot}{output_name}[{i}]'
-                        )
-                        for i, value in enumerate(result[output_name])
-                    ]
+                if len(result[output_name]) > MAX_NUMBER_ARRAY_LENGTH:
+                    raise ValueError(
+                        f'The length of output variable `{prefix}{dot}{output_name}` must be less than {MAX_NUMBER_ARRAY_LENGTH} elements.'
+                    )
+
+                transformed_result[output_name] = [
+                    self._check_number(
+                        value=value,
+                        variable=f'{prefix}{dot}{output_name}[{i}]'
+                    )
+                    for i, value in enumerate(result[output_name])
+                ]
             elif output_config.type == 'array[string]':
                 # check if array of string available
                 if not isinstance(result[output_name], list):
-                    if isinstance(result[output_name], type(None)):
-                        transformed_result[output_name] = None
-                    else:
-                        raise ValueError(
-                            f'Output {prefix}{dot}{output_name} is not an array, got {type(result.get(output_name))} instead.'
-                        )
-                else:
-                    if len(result[output_name]) > MAX_STRING_ARRAY_LENGTH:
-                        raise ValueError(
-                            f'The length of output variable `{prefix}{dot}{output_name}` must be less than {MAX_STRING_ARRAY_LENGTH} elements.'
-                        )
+                    raise ValueError(
+                        f'Output {prefix}{dot}{output_name} is not an array, got {type(result.get(output_name))} instead.'
+                    )
 
-                    transformed_result[output_name] = [
-                        self._check_string(
-                            value=value,
-                            variable=f'{prefix}{dot}{output_name}[{i}]'
-                        )
-                        for i, value in enumerate(result[output_name])
-                    ]
+                if len(result[output_name]) > MAX_STRING_ARRAY_LENGTH:
+                    raise ValueError(
+                        f'The length of output variable `{prefix}{dot}{output_name}` must be less than {MAX_STRING_ARRAY_LENGTH} elements.'
+                    )
+
+                transformed_result[output_name] = [
+                    self._check_string(
+                        value=value,
+                        variable=f'{prefix}{dot}{output_name}[{i}]'
+                    )
+                    for i, value in enumerate(result[output_name])
+                ]
             elif output_config.type == 'array[object]':
                 # check if array of object available
                 if not isinstance(result[output_name], list):
-                    if isinstance(result[output_name], type(None)):
-                        transformed_result[output_name] = None
-                    else:
-                        raise ValueError(
-                            f'Output {prefix}{dot}{output_name} is not an array, got {type(result.get(output_name))} instead.'
-                        )
-                else:
-                    if len(result[output_name]) > MAX_OBJECT_ARRAY_LENGTH:
-                        raise ValueError(
-                            f'The length of output variable `{prefix}{dot}{output_name}` must be less than {MAX_OBJECT_ARRAY_LENGTH} elements.'
-                        )
-                    
-                    for i, value in enumerate(result[output_name]):
-                        if not isinstance(value, dict):
-                            if isinstance(value, type(None)):
-                                pass
-                            else:
-                                raise ValueError(
-                                    f'Output {prefix}{dot}{output_name}[{i}] is not an object, got {type(value)} instead at index {i}.'
-                                )
+                    raise ValueError(
+                        f'Output {prefix}{dot}{output_name} is not an array, got {type(result.get(output_name))} instead.'
+                    )
 
-                    transformed_result[output_name] = [
-                        None if value is None else self._transform_result(
-                            result=value,
-                            output_schema=output_config.children,
-                            prefix=f'{prefix}{dot}{output_name}[{i}]',
-                            depth=depth + 1
+                if len(result[output_name]) > MAX_OBJECT_ARRAY_LENGTH:
+                    raise ValueError(
+                        f'The length of output variable `{prefix}{dot}{output_name}` must be less than {MAX_OBJECT_ARRAY_LENGTH} elements.'
+                    )
+                
+                for i, value in enumerate(result[output_name]):
+                    if not isinstance(value, dict):
+                        raise ValueError(
+                            f'Output {prefix}{dot}{output_name}[{i}] is not an object, got {type(value)} instead at index {i}.'
                         )
-                        for i, value in enumerate(result[output_name])
-                    ]
+
+                transformed_result[output_name] = [
+                    self._transform_result(
+                        result=value,
+                        output_schema=output_config.children,
+                        prefix=f'{prefix}{dot}{output_name}[{i}]',
+                        depth=depth + 1
+                    )
+                    for i, value in enumerate(result[output_name])
+                ]
             else:
                 raise ValueError(f'Output type {output_config.type} is not supported.')
             

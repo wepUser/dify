@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
 from copy import deepcopy
 from enum import Enum
 from typing import Any, Optional, Union
@@ -191,9 +190,8 @@ class Tool(BaseModel, ABC):
 
         return result
 
-    def invoke(self, user_id: str, tool_parameters: Mapping[str, Any]) -> list[ToolInvokeMessage]:
+    def invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> list[ToolInvokeMessage]:
         # update tool_parameters
-        # TODO: Fix type error.
         if self.runtime.runtime_parameters:
             tool_parameters.update(self.runtime.runtime_parameters)
 
@@ -210,7 +208,7 @@ class Tool(BaseModel, ABC):
 
         return result
 
-    def _transform_tool_parameters_type(self, tool_parameters: Mapping[str, Any]) -> dict[str, Any]:
+    def _transform_tool_parameters_type(self, tool_parameters: dict[str, Any]) -> dict[str, Any]:
         """
         Transform tool parameters type
         """
@@ -243,7 +241,7 @@ class Tool(BaseModel, ABC):
 
             :return: the runtime parameters
         """
-        return self.parameters or []
+        return self.parameters
     
     def get_all_runtime_parameters(self) -> list[ToolParameter]:
         """

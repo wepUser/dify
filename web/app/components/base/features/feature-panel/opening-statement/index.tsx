@@ -3,6 +3,7 @@
 import type { FC } from 'react'
 import React, { useEffect, useRef, useState } from 'react'
 import produce from 'immer'
+import cn from 'classnames'
 import {
   RiAddLine,
   RiDeleteBinLine,
@@ -15,7 +16,6 @@ import {
   useFeaturesStore,
 } from '../../hooks'
 import type { OnFeaturesChange } from '../../types'
-import cn from '@/utils/classnames'
 import Panel from '@/app/components/app/configuration/base/feature-panel'
 import Button from '@/app/components/base/button'
 import OperationBtn from '@/app/components/app/configuration/base/operation-btn'

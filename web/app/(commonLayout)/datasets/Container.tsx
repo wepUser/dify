@@ -1,8 +1,7 @@
 'use client'
 
 // Libraries
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDebounceFn } from 'ahooks'
 import useSWR from 'swr'
@@ -23,20 +22,15 @@ import { fetchDatasetApiBaseUrl } from '@/service/datasets'
 // Hooks
 import { useTabSearchParams } from '@/hooks/use-tab-searchparams'
 import { useStore as useTagStore } from '@/app/components/base/tag-management/store'
-import { useAppContext } from '@/context/app-context'
 
 const Container = () => {
   const { t } = useTranslation()
-  const router = useRouter()
-  const { currentWorkspace } = useAppContext()
   const showTagManagementModal = useTagStore(s => s.showTagManagementModal)
 
-  const options = useMemo(() => {
-    return [
-      { value: 'dataset', text: t('dataset.datasets') },
-      ...(currentWorkspace.role === 'dataset_operator' ? [] : [{ value: 'api', text: t('dataset.datasetsApi') }]),
-    ]
-  }, [currentWorkspace.role, t])
+  const options = [
+    { value: 'dataset', text: t('dataset.datasets') },
+    { value: 'api', text: t('dataset.datasetsApi') },
+  ]
 
   const [activeTab, setActiveTab] = useTabSearchParams({
     defaultTab: 'dataset',
@@ -62,11 +56,6 @@ const Container = () => {
     setTagFilterValue(value)
     handleTagsUpdate()
   }
-
-  useEffect(() => {
-    if (currentWorkspace.role === 'normal')
-      return router.replace('/apps')
-  }, [currentWorkspace])
 
   return (
     <div ref={containerRef} className='grow relative flex flex-col bg-gray-100 overflow-y-auto'>

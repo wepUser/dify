@@ -20,7 +20,7 @@ class ZhipuaiProvider(ModelProvider):
             model_instance = self.get_model_instance(ModelType.LLM)
 
             model_instance.validate_credentials(
-                model='glm-4',
+                model='chatglm_turbo',
                 credentials=credentials
             )
         except CredentialsValidateFailedError as ex:

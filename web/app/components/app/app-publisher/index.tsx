@@ -119,11 +119,11 @@ const AppPublisher = ({
       <PortalToFollowElemTrigger onClick={handleTrigger}>
         <Button
           variant='primary'
-          className='pl-3 pr-2'
+          className='pl-3 pr-1'
           disabled={disabled}
         >
           {t('workflow.common.publish')}
-          <RiArrowDownSLine className='w-4 h-4 ml-0.5' />
+          <RiArrowDownSLine className='ml-0.5' />
         </Button>
       </PortalToFollowElemTrigger>
       <PortalToFollowElemContent className='z-[11]'>

@@ -9,6 +9,7 @@ import {
 } from 'lexical'
 import { mergeRegister } from '@lexical/utils'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import cn from 'classnames'
 import {
   RiErrorWarningFill,
 } from '@remixicon/react'
@@ -19,12 +20,10 @@ import {
   DELETE_WORKFLOW_VARIABLE_BLOCK_COMMAND,
   UPDATE_WORKFLOW_NODES_MAP,
 } from './index'
-import cn from '@/utils/classnames'
 import { Variable02 } from '@/app/components/base/icons/src/vender/solid/development'
-import { BubbleX, Env } from '@/app/components/base/icons/src/vender/line/others'
 import { VarBlockIcon } from '@/app/components/workflow/block-icon'
 import { Line3 } from '@/app/components/base/icons/src/public/common'
-import { isConversationVar, isENV, isSystemVar } from '@/app/components/workflow/nodes/_base/components/variable/utils'
+import { isSystemVar } from '@/app/components/workflow/nodes/_base/components/variable/utils'
 import TooltipPlus from '@/app/components/base/tooltip-plus'
 
 type WorkflowVariableBlockComponentProps = {
@@ -51,8 +50,6 @@ const WorkflowVariableBlockComponent = ({
   )()
   const [localWorkflowNodesMap, setLocalWorkflowNodesMap] = useState<WorkflowNodesMap>(workflowNodesMap)
   const node = localWorkflowNodesMap![variables[0]]
-  const isEnv = isENV(variables)
-  const isChatVar = isConversationVar(variables)
 
   useEffect(() => {
     if (!editor.hasNodes([WorkflowVariableBlockNode]))
@@ -76,34 +73,30 @@ const WorkflowVariableBlockComponent = ({
       className={cn(
         'mx-0.5 relative group/wrap flex items-center h-[18px] pl-0.5 pr-[3px] rounded-[5px] border select-none',
         isSelected ? ' border-[#84ADFF] bg-[#F5F8FF]' : ' border-black/5 bg-white',
-        !node && !isEnv && !isChatVar && '!border-[#F04438] !bg-[#FEF3F2]',
+        !node && '!border-[#F04438] !bg-[#FEF3F2]',
       )}
       ref={ref}
     >
-      {!isEnv && !isChatVar && (
-        <div className='flex items-center'>
-          {
-            node?.type && (
-              <div className='p-[1px]'>
-                <VarBlockIcon
-                  className='!text-gray-500'
-                  type={node?.type}
-                />
-              </div>
-            )
-          }
-          <div className='shrink-0 mx-0.5 max-w-[60px] text-xs font-medium text-gray-500 truncate' title={node?.title} style={{
-          }}>{node?.title}</div>
-          <Line3 className='mr-0.5 text-gray-300'></Line3>
-        </div>
-      )}
-      <div className='flex items-center text-primary-600'>
-        {!isEnv && !isChatVar && <Variable02 className='shrink-0 w-3.5 h-3.5' />}
-        {isEnv && <Env className='shrink-0 w-3.5 h-3.5 text-util-colors-violet-violet-600' />}
-        {isChatVar && <BubbleX className='w-3.5 h-3.5 text-util-colors-teal-teal-700' />}
-        <div className={cn('shrink-0 ml-0.5 text-xs font-medium truncate', (isEnv || isChatVar) && 'text-gray-900')} title={varName}>{varName}</div>
+      <div className='flex items-center'>
         {
-          !node && !isEnv && !isChatVar && (
+          node?.type && (
+            <div className='p-[1px]'>
+              <VarBlockIcon
+                className='!text-gray-500'
+                type={node?.type}
+              />
+            </div>
+          )
+        }
+        <div className='shrink-0 mx-0.5 text-xs font-medium text-gray-500 truncate' title={node?.title} style={{
+        }}>{node?.title}</div>
+        <Line3 className='mr-0.5 text-gray-300'></Line3>
+      </div>
+      <div className='flex items-center text-primary-600'>
+        <Variable02 className='w-3.5 h-3.5' />
+        <div className='shrink-0 ml-0.5 text-xs font-medium truncate' title={varName}>{varName}</div>
+        {
+          !node && (
             <RiErrorWarningFill className='ml-0.5 w-3 h-3 text-[#D92D20]' />
           )
         }
@@ -111,7 +104,7 @@ const WorkflowVariableBlockComponent = ({
     </div>
   )
 
-  if (!node && !isEnv && !isChatVar) {
+  if (!node) {
     return (
       <TooltipPlus popupContent={t('workflow.errorMsg.invalidVariable')}>
         {Item}

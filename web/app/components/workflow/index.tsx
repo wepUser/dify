@@ -7,7 +7,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react'
 import { setAutoFreeze } from 'immer'
 import {
@@ -22,7 +21,6 @@ import ReactFlow, {
   useNodesState,
   useOnViewportChange,
   useReactFlow,
-  useStoreApi,
 } from 'reactflow'
 import type {
   Viewport,
@@ -31,7 +29,6 @@ import 'reactflow/dist/style.css'
 import './style.css'
 import type {
   Edge,
-  EnvironmentVariable,
   Node,
 } from './types'
 import { WorkflowContextProvider } from './context'
@@ -64,7 +61,6 @@ import PanelContextmenu from './panel-contextmenu'
 import NodeContextmenu from './node-contextmenu'
 import SyncingDataModal from './syncing-data-modal'
 import UpdateDSLModal from './update-dsl-modal'
-import DSLExportConfirmModal from './dsl-export-confirm-modal'
 import {
   useStore,
   useWorkflowStore,
@@ -77,7 +73,6 @@ import {
 } from './utils'
 import {
   CUSTOM_NODE,
-  DSL_EXPORT_CHECK,
   ITERATION_CHILDREN_Z_INDEX,
   WORKFLOW_DATA_UPDATE,
 } from './constants'
@@ -87,7 +82,7 @@ import { FeaturesProvider } from '@/app/components/base/features'
 import type { Features as FeaturesData } from '@/app/components/base/features/types'
 import { useFeaturesStore } from '@/app/components/base/features/hooks'
 import { useEventEmitterContextContext } from '@/context/event-emitter'
-import Confirm from '@/app/components/base/confirm'
+import Confirm from '@/app/components/base/confirm/common'
 
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
@@ -118,7 +113,6 @@ const Workflow: FC<WorkflowProps> = memo(({
   const nodeAnimation = useStore(s => s.nodeAnimation)
   const showConfirm = useStore(s => s.showConfirm)
   const showImportDSLModal = useStore(s => s.showImportDSLModal)
-
   const {
     setShowConfirm,
     setControlPromptEditorRerenderKey,
@@ -131,8 +125,6 @@ const Workflow: FC<WorkflowProps> = memo(({
   } = useNodesSyncDraft()
   const { workflowReadOnly } = useWorkflowReadOnly()
   const { nodesReadOnly } = useNodesReadOnly()
-
-  const [secretEnvList, setSecretEnvList] = useState<EnvironmentVariable[]>([])
 
   const { eventEmitter } = useEventEmitterContextContext()
 
@@ -155,8 +147,6 @@ const Workflow: FC<WorkflowProps> = memo(({
 
       setTimeout(() => setControlPromptEditorRerenderKey(Date.now()))
     }
-    if (v.type === DSL_EXPORT_CHECK)
-      setSecretEnvList(v.payload.data as EnvironmentVariable[])
   })
 
   useEffect(() => {
@@ -193,10 +183,6 @@ const Workflow: FC<WorkflowProps> = memo(({
     if ((e.key === 'd' || e.key === 'D') && (e.ctrlKey || e.metaKey))
       e.preventDefault()
     if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey))
-      e.preventDefault()
-    if ((e.key === 'y' || e.key === 'Y') && (e.ctrlKey || e.metaKey))
-      e.preventDefault()
-    if ((e.key === 's' || e.key === 'S') && (e.ctrlKey || e.metaKey))
       e.preventDefault()
   })
   useEventListener('mousemove', (e) => {
@@ -252,7 +238,6 @@ const Workflow: FC<WorkflowProps> = memo(({
   } = useWorkflow()
   const { handleStartWorkflowRun } = useWorkflowStartRun()
   const {
-    exportCheck,
     handleExportDSL,
   } = useDSL()
 
@@ -264,12 +249,7 @@ const Workflow: FC<WorkflowProps> = memo(({
 
   const { shortcutsEnabled: workflowHistoryShortcutsEnabled } = useWorkflowHistoryStore()
 
-  useKeyPress(['delete', 'backspace'], (e) => {
-    if (isEventTargetInputArea(e.target as HTMLElement))
-      return
-
-    handleNodesDelete()
-  })
+  useKeyPress('delete', handleNodesDelete)
   useKeyPress(['delete', 'backspace'], handleEdgeDelete)
   useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.c`, (e) => {
     if (isEventTargetInputArea(e.target as HTMLElement))
@@ -298,15 +278,6 @@ const Workflow: FC<WorkflowProps> = memo(({
     { exactMatch: true, useCapture: true },
   )
 
-  const store = useStoreApi()
-  if (process.env.NODE_ENV === 'development') {
-    store.getState().onError = (code, message) => {
-      if (code === '002')
-        return
-      console.warn(message)
-    }
-  }
-
   return (
     <div
       id='workflow-container'
@@ -319,7 +290,7 @@ const Workflow: FC<WorkflowProps> = memo(({
     >
       <SyncingDataModal />
       <CandidateNode />
-      <Header />
+      <Header/>
       <Panel />
       <Operator handleRedo={handleHistoryForward} handleUndo={handleHistoryBack} />
       {
@@ -335,7 +306,8 @@ const Workflow: FC<WorkflowProps> = memo(({
             onCancel={() => setShowConfirm(undefined)}
             onConfirm={showConfirm.onConfirm}
             title={showConfirm.title}
-            content={showConfirm.desc}
+            desc={showConfirm.desc}
+            confirmWrapperClassName='!z-[11]'
           />
         )
       }
@@ -343,17 +315,8 @@ const Workflow: FC<WorkflowProps> = memo(({
         showImportDSLModal && (
           <UpdateDSLModal
             onCancel={() => setShowImportDSLModal(false)}
-            onBackup={exportCheck}
+            onBackup={handleExportDSL}
             onImport={handlePaneContextmenuCancel}
-          />
-        )
-      }
-      {
-        secretEnvList.length > 0 && (
-          <DSLExportConfirmModal
-            envList={secretEnvList}
-            onConfirm={handleExportDSL}
-            onClose={() => setSecretEnvList([])}
           />
         )
       }

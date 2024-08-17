@@ -1,5 +1,3 @@
-import uuid
-
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import and_, or_
 
@@ -27,25 +25,19 @@ class WorkflowAppService:
         )
 
         status = WorkflowRunStatus.value_of(args.get('status')) if args.get('status') else None
-        keyword = args['keyword']
-        if keyword or status:
+        if args['keyword'] or status:
             query = query.join(
                 WorkflowRun, WorkflowRun.id == WorkflowAppLog.workflow_run_id
             )
 
-        if keyword:
-            keyword_like_val = f"%{args['keyword'][:30]}%"
+        if args['keyword']:
+            keyword_val = f"%{args['keyword'][:30]}%"
             keyword_conditions = [
-                WorkflowRun.inputs.ilike(keyword_like_val),
-                WorkflowRun.outputs.ilike(keyword_like_val),
+                WorkflowRun.inputs.ilike(keyword_val),
+                WorkflowRun.outputs.ilike(keyword_val),
                 # filter keyword by end user session id if created by end user role
-                and_(WorkflowRun.created_by_role == 'end_user', EndUser.session_id.ilike(keyword_like_val))
+                and_(WorkflowRun.created_by_role == 'end_user', EndUser.session_id.ilike(keyword_val))
             ]
-
-            # filter keyword by workflow run id
-            keyword_uuid = self._safe_parse_uuid(keyword)
-            if keyword_uuid:
-                keyword_conditions.append(WorkflowRun.id == keyword_uuid)
 
             query = query.outerjoin(
                 EndUser,
@@ -68,14 +60,3 @@ class WorkflowAppService:
         )
 
         return pagination
-
-    @staticmethod
-    def _safe_parse_uuid(value: str):
-        # fast check
-        if len(value) < 32:
-            return None
-
-        try:
-            return uuid.UUID(value)
-        except ValueError:
-            return None

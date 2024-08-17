@@ -5,12 +5,11 @@ import { useTranslation } from 'react-i18next'
 import produce from 'immer'
 import { ReactSortable } from 'react-sortablejs'
 import { v4 as uuid4 } from 'uuid'
-import type { ModelConfig, PromptItem, ValueSelector, Var, Variable } from '../../../types'
+import cn from 'classnames'
+import type { PromptItem, ValueSelector, Var, Variable } from '../../../types'
 import { EditionType, PromptRole } from '../../../types'
 import useAvailableVarList from '../../_base/hooks/use-available-var-list'
-import { useWorkflowStore } from '../../../store'
 import ConfigPromptItem from './config-prompt-item'
-import cn from '@/utils/classnames'
 import Editor from '@/app/components/workflow/nodes/_base/components/prompt/editor'
 import AddButton from '@/app/components/workflow/nodes/_base/components/add-button'
 import { DragHandle } from '@/app/components/base/icons/src/vender/line/others'
@@ -33,7 +32,6 @@ type Props = {
   }
   varList?: Variable[]
   handleAddVariable: (payload: any) => void
-  modelConfig: ModelConfig
 }
 
 const ConfigPrompt: FC<Props> = ({
@@ -48,13 +46,8 @@ const ConfigPrompt: FC<Props> = ({
   hasSetBlockStatus,
   varList = [],
   handleAddVariable,
-  modelConfig,
 }) => {
   const { t } = useTranslation()
-  const workflowStore = useWorkflowStore()
-  const {
-    setControlPromptEditorRerenderKey,
-  } = workflowStore.getState()
   const payloadWithIds = (isChatModel && Array.isArray(payload))
     ? payload.map((item) => {
       const id = uuid4()
@@ -131,11 +124,6 @@ const ConfigPrompt: FC<Props> = ({
     onChange(newPrompt)
   }, [onChange, payload])
 
-  const handleGenerated = useCallback((prompt: string) => {
-    handleCompletionPromptChange(prompt)
-    setTimeout(() => setControlPromptEditorRerenderKey(Date.now()))
-  }, [handleCompletionPromptChange, setControlPromptEditorRerenderKey])
-
   const handleCompletionEditionTypeChange = useCallback((editionType: EditionType) => {
     const newPrompt = produce(payload as PromptItem, (draft) => {
       draft.edition_type = editionType
@@ -201,11 +189,12 @@ const ConfigPrompt: FC<Props> = ({
                           availableNodes={availableNodesWithParent}
                           varList={varList}
                           handleAddVariable={handleAddVariable}
-                          modelConfig={modelConfig}
                         />
                       </div>
+
                     )
                   })
+
                 }
               </ReactSortable>
             </div>
@@ -230,14 +219,11 @@ const ConfigPrompt: FC<Props> = ({
               hasSetBlockStatus={hasSetBlockStatus}
               nodesOutputVars={availableVars}
               availableNodes={availableNodesWithParent}
-              isSupportPromptGenerator
               isSupportJinja
               editionType={(payload as PromptItem).edition_type}
               varList={varList}
               onEditionTypeChange={handleCompletionEditionTypeChange}
               handleAddVariable={handleAddVariable}
-              onGenerated={handleGenerated}
-              modelConfig={modelConfig}
             />
           </div>
         )}

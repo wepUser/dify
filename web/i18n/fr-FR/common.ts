@@ -12,7 +12,6 @@ const translation = {
     cancel: 'Annuler',
     clear: 'Effacer',
     save: 'Enregistrer',
-    saveAndEnable: 'Enregistrer et Activer',
     edit: 'Modifier',
     add: 'Ajouter',
     added: 'Ajouté',
@@ -120,7 +119,6 @@ const translation = {
   },
   userProfile: {
     settings: 'Paramètres',
-    emailSupport: 'Support par courriel',
     workspace: 'Espace de travail',
     createWorkspace: 'Créer un Espace de Travail',
     helpCenter: 'Aide',
@@ -409,7 +407,7 @@ const translation = {
     latestAvailable: 'Dify {{version}} est la dernière version disponible.',
   },
   appMenus: {
-    overview: 'Surveillance',
+    overview: 'Aperçu',
     promptEng: 'Orchestrer',
     apiAccess: 'Accès API',
     logAndAnn: 'Journaux & Annonces.',

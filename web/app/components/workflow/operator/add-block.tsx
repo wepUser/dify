@@ -3,6 +3,7 @@ import {
   useCallback,
   useState,
 } from 'react'
+import cn from 'classnames'
 import { RiAddCircleFill } from '@remixicon/react'
 import { useStoreApi } from 'reactflow'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +19,6 @@ import {
 import { NODES_INITIAL_DATA } from '../constants'
 import { useWorkflowStore } from '../store'
 import TipPopup from './tip-popup'
-import cn from '@/utils/classnames'
 import BlockSelector from '@/app/components/workflow/block-selector'
 import type {
   OnSelectBlock,

@@ -71,10 +71,9 @@ class ParameterExtractorNode(LLMNode):
         Run the node.
         """
         node_data = cast(ParameterExtractorNodeData, self.node_data)
-        variable = variable_pool.get_any(node_data.query)
-        if not variable:
+        query = variable_pool.get_variable_value(node_data.query)
+        if not query:
             raise ValueError("Input variable content not found or is empty")
-        query = variable
 
         inputs = {
             'query': query,
@@ -565,8 +564,7 @@ class ParameterExtractorNode(LLMNode):
         variable_template_parser = VariableTemplateParser(instruction)
         inputs = {}
         for selector in variable_template_parser.extract_variable_selectors():
-            variable = variable_pool.get_any(selector.value_selector)
-            inputs[selector.variable] = variable
+            inputs[selector.variable] = variable_pool.get_variable_value(selector.value_selector)
 
         return variable_template_parser.format(inputs)
 

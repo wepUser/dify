@@ -40,7 +40,7 @@ import {
   PortalToFollowElemContent,
 } from '@/app/components/base/portal-to-follow-elem'
 import { useToastContext } from '@/app/components/base/toast'
-import Confirm from '@/app/components/base/confirm'
+import ConfirmCommon from '@/app/components/base/confirm/common'
 
 type ModelModalProps = {
   provider: ModelProvider
@@ -330,11 +330,12 @@ const ModelLoadBalancingEntryModal: FC<ModelModalProps> = ({
           </div>
           {
             showConfirm && (
-              <Confirm
+              <ConfirmCommon
                 title={t('common.modelProvider.confirmDelete')}
                 isShow={showConfirm}
                 onCancel={() => setShowConfirm(false)}
                 onConfirm={handleRemove}
+                confirmWrapperClassName='z-[70]'
               />
             )
           }

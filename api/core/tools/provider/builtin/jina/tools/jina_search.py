@@ -40,12 +40,10 @@ class JinaSearchTool(BuiltinTool):
         if tool_parameters.get('no_cache', False):
             headers['X-No-Cache'] = 'true'
 
-        max_retries = tool_parameters.get('max_retries', 3)
         response = ssrf_proxy.get(
             str(URL(self._jina_search_endpoint + query)),
             headers=headers,
-            timeout=(10, 60),
-            max_retries=max_retries
+            timeout=(10, 60)
         )
 
         return self.create_text_message(response.text)

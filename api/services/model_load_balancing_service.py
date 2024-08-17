@@ -4,7 +4,6 @@ import logging
 from json import JSONDecodeError
 from typing import Optional
 
-from constants import HIDDEN_VALUE
 from core.entities.provider_configuration import ProviderConfiguration
 from core.helper import encrypter
 from core.helper.model_provider_cache import ProviderCredentialsCache, ProviderCredentialsCacheType
@@ -132,7 +131,7 @@ class ModelLoadBalancingService:
                 load_balancing_configs.insert(0, inherit_config)
             else:
                 # move the inherit configuration to the first
-                for i, load_balancing_config in enumerate(load_balancing_configs[:]):
+                for i, load_balancing_config in enumerate(load_balancing_configs):
                     if load_balancing_config.name == '__inherit__':
                         inherit_config = load_balancing_configs.pop(i)
                         load_balancing_configs.insert(0, inherit_config)
@@ -512,7 +511,7 @@ class ModelLoadBalancingService:
             for key, value in credentials.items():
                 if key in provider_credential_secret_variables:
                     # if send [__HIDDEN__] in secret input, it will be same as original value
-                    if value == HIDDEN_VALUE and key in original_credentials:
+                    if value == '[__HIDDEN__]' and key in original_credentials:
                         credentials[key] = encrypter.decrypt_token(tenant_id, original_credentials[key])
 
         if validate:

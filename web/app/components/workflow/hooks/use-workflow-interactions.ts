@@ -1,11 +1,8 @@
-import {
-  useCallback,
-  useState,
-} from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useReactFlow } from 'reactflow'
 import { useWorkflowStore } from '../store'
-import { DSL_EXPORT_CHECK, WORKFLOW_DATA_UPDATE } from '../constants'
+import { WORKFLOW_DATA_UPDATE } from '../constants'
 import type { WorkflowDataUpdator } from '../types'
 import {
   initialEdges,
@@ -13,7 +10,6 @@ import {
 } from '../utils'
 import { useEdgesInteractions } from './use-edges-interactions'
 import { useNodesInteractions } from './use-nodes-interactions'
-import { useNodesSyncDraft } from './use-nodes-sync-draft'
 import { useEventEmitterContextContext } from '@/context/event-emitter'
 import { fetchWorkflowDraft } from '@/service/workflow'
 import { exportAppConfig } from '@/service/apps'
@@ -66,21 +62,11 @@ export const useWorkflowUpdate = () => {
       appId,
       setSyncWorkflowDraftHash,
       setIsSyncingWorkflowDraft,
-      setEnvironmentVariables,
-      setEnvSecrets,
-      setConversationVariables,
     } = workflowStore.getState()
     setIsSyncingWorkflowDraft(true)
     fetchWorkflowDraft(`/apps/${appId}/workflows/draft`).then((response) => {
       handleUpdateWorkflowCanvas(response.graph as WorkflowDataUpdator)
       setSyncWorkflowDraftHash(response.hash)
-      setEnvSecrets((response.environment_variables || []).filter(env => env.value_type === 'secret').reduce((acc, env) => {
-        acc[env.id] = env.value
-        return acc
-      }, {} as Record<string, string>))
-      setEnvironmentVariables(response.environment_variables?.map(env => env.value_type === 'secret' ? { ...env, value: '[__HIDDEN__]' } : env) || [])
-      // #TODO chatVar sync#
-      setConversationVariables(response.conversation_variables || [])
     }).finally(() => setIsSyncingWorkflowDraft(false))
   }, [handleUpdateWorkflowCanvas, workflowStore])
 
@@ -93,26 +79,13 @@ export const useWorkflowUpdate = () => {
 export const useDSL = () => {
   const { t } = useTranslation()
   const { notify } = useToastContext()
-  const { eventEmitter } = useEventEmitterContextContext()
-  const [exporting, setExporting] = useState(false)
-  const { doSyncWorkflowDraft } = useNodesSyncDraft()
-
   const appDetail = useAppStore(s => s.appDetail)
 
-  const handleExportDSL = useCallback(async (include = false) => {
+  const handleExportDSL = useCallback(async () => {
     if (!appDetail)
       return
-
-    if (exporting)
-      return
-
     try {
-      setExporting(true)
-      await doSyncWorkflowDraft()
-      const { data } = await exportAppConfig({
-        appID: appDetail.id,
-        include,
-      })
+      const { data } = await exportAppConfig(appDetail.id)
       const a = document.createElement('a')
       const file = new Blob([data], { type: 'application/yaml' })
       a.href = URL.createObjectURL(file)
@@ -122,35 +95,9 @@ export const useDSL = () => {
     catch (e) {
       notify({ type: 'error', message: t('app.exportFailed') })
     }
-    finally {
-      setExporting(false)
-    }
-  }, [appDetail, notify, t, doSyncWorkflowDraft, exporting])
-
-  const exportCheck = useCallback(async () => {
-    if (!appDetail)
-      return
-    try {
-      const workflowDraft = await fetchWorkflowDraft(`/apps/${appDetail?.id}/workflows/draft`)
-      const list = (workflowDraft.environment_variables || []).filter(env => env.value_type === 'secret')
-      if (list.length === 0) {
-        handleExportDSL()
-        return
-      }
-      eventEmitter?.emit({
-        type: DSL_EXPORT_CHECK,
-        payload: {
-          data: list,
-        },
-      } as any)
-    }
-    catch (e) {
-      notify({ type: 'error', message: t('app.exportFailed') })
-    }
-  }, [appDetail, eventEmitter, handleExportDSL, notify, t])
+  }, [appDetail, notify, t])
 
   return {
-    exportCheck,
     handleExportDSL,
   }
 }

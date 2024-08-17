@@ -2,6 +2,7 @@
 import type { FC } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import cn from 'classnames'
 import {
   RiDeleteBinLine,
 } from '@remixicon/react'
@@ -9,7 +10,6 @@ import Indicator from '../../../indicator'
 import Operate from '../data-source-notion/operate'
 import { DataSourceType } from './types'
 import s from './style.module.css'
-import cn from '@/utils/classnames'
 
 export type ConfigItemType = {
   id: string

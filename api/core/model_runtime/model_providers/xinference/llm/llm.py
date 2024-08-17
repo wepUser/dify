@@ -453,11 +453,9 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         if credentials['server_url'].endswith('/'):
             credentials['server_url'] = credentials['server_url'][:-1]
 
-        api_key = credentials.get('api_key') or "abc"
-
         client = OpenAI(
             base_url=f'{credentials["server_url"]}/v1',
-            api_key=api_key,
+            api_key='abc',
             max_retries=3,
             timeout=60,
         )

@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import classNames from '@/utils/classnames'
+import classNames from 'classnames'
 // https://headlessui.com/react/dialog
 
 type IModal = {

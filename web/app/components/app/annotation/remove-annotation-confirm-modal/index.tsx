@@ -2,7 +2,7 @@
 import type { FC } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import Confirm from '@/app/components/base/confirm'
+import DeleteConfirmModal from '@/app/components/base/modal/delete-confirm-modal'
 
 type Props = {
   isShow: boolean
@@ -18,11 +18,11 @@ const RemoveAnnotationConfirmModal: FC<Props> = ({
   const { t } = useTranslation()
 
   return (
-    <Confirm
+    <DeleteConfirmModal
       isShow={isShow}
-      onCancel={onHide}
-      onConfirm={onRemove}
-      title={t('appDebug.feature.annotation.removeConfirm')}
+      onHide={onHide}
+      onRemove={onRemove}
+      text={t('appDebug.feature.annotation.removeConfirm') as string}
     />
   )
 }

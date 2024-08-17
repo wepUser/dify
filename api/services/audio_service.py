@@ -1,12 +1,11 @@
 import io
-import logging
 from typing import Optional
 
 from werkzeug.datastructures import FileStorage
 
 from core.model_manager import ModelManager
 from core.model_runtime.entities.model_entities import ModelType
-from models.model import App, AppMode, AppModelConfig, Message
+from models.model import App, AppMode, AppModelConfig
 from services.errors.audio import (
     AudioTooLargeServiceError,
     NoAudioUploadedServiceError,
@@ -18,8 +17,6 @@ from services.errors.audio import (
 FILE_SIZE = 30
 FILE_SIZE_LIMIT = FILE_SIZE * 1024 * 1024
 ALLOWED_EXTENSIONS = ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm', 'amr']
-
-logger = logging.getLogger(__name__)
 
 
 class AudioService:
@@ -67,74 +64,51 @@ class AudioService:
         return {"text": model_instance.invoke_speech2text(file=buffer, user=end_user)}
 
     @classmethod
-    def transcript_tts(cls, app_model: App, text: Optional[str] = None,
-                       voice: Optional[str] = None, end_user: Optional[str] = None, message_id: Optional[str] = None):
-        from collections.abc import Generator
+    def transcript_tts(cls, app_model: App, text: str, streaming: bool,
+                       voice: Optional[str] = None, end_user: Optional[str] = None):
+        if app_model.mode in [AppMode.ADVANCED_CHAT.value, AppMode.WORKFLOW.value]:
+            workflow = app_model.workflow
+            if workflow is None:
+                raise ValueError("TTS is not enabled")
 
-        from flask import Response, stream_with_context
+            features_dict = workflow.features_dict
+            if 'text_to_speech' not in features_dict or not features_dict['text_to_speech'].get('enabled'):
+                raise ValueError("TTS is not enabled")
 
-        from app import app
-        from extensions.ext_database import db
-
-        def invoke_tts(text_content: str, app_model, voice: Optional[str] = None):
-            with app.app_context():
-                if app_model.mode in [AppMode.ADVANCED_CHAT.value, AppMode.WORKFLOW.value]:
-                    workflow = app_model.workflow
-                    if workflow is None:
-                        raise ValueError("TTS is not enabled")
-
-                    features_dict = workflow.features_dict
-                    if 'text_to_speech' not in features_dict or not features_dict['text_to_speech'].get('enabled'):
-                        raise ValueError("TTS is not enabled")
-
-                    voice = features_dict['text_to_speech'].get('voice') if voice is None else voice
-                else:
-                    text_to_speech_dict = app_model.app_model_config.text_to_speech_dict
-
-                    if not text_to_speech_dict.get('enabled'):
-                        raise ValueError("TTS is not enabled")
-
-                    voice = text_to_speech_dict.get('voice') if voice is None else voice
-
-                model_manager = ModelManager()
-                model_instance = model_manager.get_default_model_instance(
-                    tenant_id=app_model.tenant_id,
-                    model_type=ModelType.TTS
-                )
-                try:
-                    if not voice:
-                        voices = model_instance.get_tts_voices()
-                        if voices:
-                            voice = voices[0].get('value')
-                        else:
-                            raise ValueError("Sorry, no voice available.")
-
-                    return model_instance.invoke_tts(
-                        content_text=text_content.strip(),
-                        user=end_user,
-                        tenant_id=app_model.tenant_id,
-                        voice=voice
-                    )
-                except Exception as e:
-                    raise e
-
-        if message_id:
-            message = db.session.query(Message).filter(
-                Message.id == message_id
-            ).first()
-            if message.answer == '' and message.status == 'normal':
-                return None
-
-            else:
-                response = invoke_tts(message.answer, app_model=app_model, voice=voice)
-                if isinstance(response, Generator):
-                    return Response(stream_with_context(response), content_type='audio/mpeg')
-                return response
+            voice = features_dict['text_to_speech'].get('voice') if voice is None else voice
         else:
-            response = invoke_tts(text, app_model, voice)
-            if isinstance(response, Generator):
-                return Response(stream_with_context(response), content_type='audio/mpeg')
-            return response
+            text_to_speech_dict = app_model.app_model_config.text_to_speech_dict
+
+            if not text_to_speech_dict.get('enabled'):
+                raise ValueError("TTS is not enabled")
+
+            voice = text_to_speech_dict.get('voice') if voice is None else voice
+
+        model_manager = ModelManager()
+        model_instance = model_manager.get_default_model_instance(
+            tenant_id=app_model.tenant_id,
+            model_type=ModelType.TTS
+        )
+        if model_instance is None:
+            raise ProviderNotSupportTextToSpeechServiceError()
+
+        try:
+            if not voice:
+                voices = model_instance.get_tts_voices()
+                if voices:
+                    voice = voices[0].get('value')
+                else:
+                    raise ValueError("Sorry, no voice available.")
+
+            return model_instance.invoke_tts(
+                content_text=text.strip(),
+                user=end_user,
+                streaming=streaming,
+                tenant_id=app_model.tenant_id,
+                voice=voice
+            )
+        except Exception as e:
+            raise e
 
     @classmethod
     def transcript_tts_voices(cls, tenant_id: str, language: str):

@@ -23,7 +23,6 @@ class SecurityConfig(BaseSettings):
         default=24,
     )
 
-
 class AppExecutionConfig(BaseSettings):
     """
     App Execution configs
@@ -31,10 +30,6 @@ class AppExecutionConfig(BaseSettings):
     APP_MAX_EXECUTION_TIME: PositiveInt = Field(
         description='execution timeout in seconds for app execution',
         default=1200,
-    )
-    APP_MAX_ACTIVE_REQUESTS: NonNegativeInt = Field(
-        description='max active request per app, 0 means unlimited',
-        default=0,
     )
 
 
@@ -401,10 +396,6 @@ class DataSetConfig(BaseSettings):
         default=30,
     )
 
-    DATASET_OPERATOR_ENABLED: bool = Field(
-        description='whether to enable dataset operator',
-        default=False,
-    )
 
 class WorkspaceConfig(BaseSettings):
     """
@@ -435,13 +426,6 @@ class ImageFormatConfig(BaseSettings):
     )
 
 
-class CeleryBeatConfig(BaseSettings):
-    CELERY_BEAT_SCHEDULER_TIME: int = Field(
-        description='the time of the celery scheduler, default to 1 day',
-        default=1,
-    )
-
-
 class FeatureConfig(
     # place the configs in alphabet order
     AppExecutionConfig,
@@ -469,6 +453,5 @@ class FeatureConfig(
 
     # hosted services config
     HostedServiceConfig,
-    CeleryBeatConfig,
 ):
     pass

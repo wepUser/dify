@@ -1,9 +1,8 @@
-from flask import request
+from flask import current_app, request
 from flask_login import current_user
 from flask_restful import Resource, marshal_with
 
 import services
-from configs import dify_config
 from controllers.console import api
 from controllers.console.datasets.error import (
     FileTooLargeError,
@@ -27,9 +26,9 @@ class FileApi(Resource):
     @account_initialization_required
     @marshal_with(upload_config_fields)
     def get(self):
-        file_size_limit = dify_config.UPLOAD_FILE_SIZE_LIMIT
-        batch_count_limit = dify_config.UPLOAD_FILE_BATCH_LIMIT
-        image_file_size_limit = dify_config.UPLOAD_IMAGE_FILE_SIZE_LIMIT
+        file_size_limit = current_app.config.get("UPLOAD_FILE_SIZE_LIMIT")
+        batch_count_limit = current_app.config.get("UPLOAD_FILE_BATCH_LIMIT")
+        image_file_size_limit = current_app.config.get("UPLOAD_IMAGE_FILE_SIZE_LIMIT")
         return {
             'file_size_limit': file_size_limit,
             'batch_count_limit': batch_count_limit,
@@ -77,7 +76,7 @@ class FileSupportTypeApi(Resource):
     @login_required
     @account_initialization_required
     def get(self):
-        etl_type = dify_config.ETL_TYPE
+        etl_type = current_app.config['ETL_TYPE']
         allowed_extensions = UNSTRUCTURED_ALLOWED_EXTENSIONS if etl_type == 'Unstructured' else ALLOWED_EXTENSIONS
         return {'allowed_extensions': allowed_extensions}
 

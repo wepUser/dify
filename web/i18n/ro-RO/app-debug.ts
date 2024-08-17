@@ -322,9 +322,6 @@ const translation = {
       language: 'Limbă',
       resolutionTooltip: 'Suport pentru limba de voce text-to-speech.',
       voice: 'Voce',
-      autoPlay: 'Redare automata',
-      autoPlayEnabled: 'Deschis',
-      autoPlayDisabled: 'închidere',
     },
   },
   openingStatement: {

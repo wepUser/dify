@@ -1,12 +1,11 @@
 'use client'
 import type { FC } from 'react'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { uniqueId } from 'lodash-es'
 import { useTranslation } from 'react-i18next'
 import { RiQuestionLine } from '@remixicon/react'
-import type { ModelConfig, PromptItem, Variable } from '../../../types'
+import type { PromptItem, Variable } from '../../../types'
 import { EditionType } from '../../../types'
-import { useWorkflowStore } from '../../../store'
 import Editor from '@/app/components/workflow/nodes/_base/components/prompt/editor'
 import TypeSelector from '@/app/components/workflow/nodes/_base/components/selector'
 import TooltipPlus from '@/app/components/base/tooltip-plus'
@@ -38,7 +37,6 @@ type Props = {
   availableNodes: any
   varList: Variable[]
   handleAddVariable: (payload: any) => void
-  modelConfig?: ModelConfig
 }
 
 const roleOptions = [
@@ -78,22 +76,12 @@ const ConfigPromptItem: FC<Props> = ({
   availableNodes,
   varList,
   handleAddVariable,
-  modelConfig,
 }) => {
   const { t } = useTranslation()
-  const workflowStore = useWorkflowStore()
-  const {
-    setControlPromptEditorRerenderKey,
-  } = workflowStore.getState()
   const [instanceId, setInstanceId] = useState(uniqueId())
   useEffect(() => {
     setInstanceId(`${id}-${uniqueId()}`)
   }, [id])
-
-  const handleGenerated = useCallback((prompt: string) => {
-    onPromptChange(prompt)
-    setTimeout(() => setControlPromptEditorRerenderKey(Date.now()))
-  }, [onPromptChange, setControlPromptEditorRerenderKey])
 
   return (
     <Editor
@@ -138,9 +126,6 @@ const ConfigPromptItem: FC<Props> = ({
       hasSetBlockStatus={hasSetBlockStatus}
       nodesOutputVars={availableVars}
       availableNodes={availableNodes}
-      isSupportPromptGenerator={payload.role === PromptRole.system}
-      onGenerated={handleGenerated}
-      modelConfig={modelConfig}
       isSupportJinja
       editionType={payload.edition_type}
       onEditionTypeChange={onEditionTypeChange}

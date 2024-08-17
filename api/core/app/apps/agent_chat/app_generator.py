@@ -110,8 +110,7 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
         )
 
         # get tracing instance
-        user_id = user.id if isinstance(user, Account) else user.session_id
-        trace_manager = TraceQueueManager(app_model.id, user_id)
+        trace_manager = TraceQueueManager(app_model.id)
 
         # init application generate entity
         application_generate_entity = AgentChatAppGenerateEntity(

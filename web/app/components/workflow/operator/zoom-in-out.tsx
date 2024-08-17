@@ -5,6 +5,7 @@ import {
   useCallback,
   useState,
 } from 'react'
+import cn from 'classnames'
 import {
   RiZoomInLine,
   RiZoomOutLine,
@@ -26,7 +27,6 @@ import {
 } from '../utils'
 import ShortcutsName from '../shortcuts-name'
 import TipPopup from './tip-popup'
-import cn from '@/utils/classnames'
 import {
   PortalToFollowElem,
   PortalToFollowElemContent,

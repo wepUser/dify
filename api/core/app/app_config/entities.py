@@ -3,9 +3,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from core.file.file_obj import FileExtraConfig
 from core.model_runtime.entities.message_entities import PromptMessageRole
-from models import AppMode
+from models.model import AppMode
 
 
 class ModelConfigEntity(BaseModel):
@@ -159,13 +158,8 @@ class DatasetRetrieveConfigEntity(BaseModel):
 
     retrieve_strategy: RetrieveStrategy
     top_k: Optional[int] = None
-    score_threshold: Optional[float] = .0
-    rerank_mode: Optional[str] = 'reranking_model'
+    score_threshold: Optional[float] = None
     reranking_model: Optional[dict] = None
-    weights: Optional[dict] = None
-    reranking_enabled: Optional[bool] = True
-
-
 
 
 class DatasetEntity(BaseModel):
@@ -201,6 +195,11 @@ class TracingConfigEntity(BaseModel):
     tracing_provider: str
 
 
+class FileExtraConfig(BaseModel):
+    """
+    File Upload Entity.
+    """
+    image_config: Optional[dict[str, Any]] = None
 
 
 class AppAdditionalFeatures(BaseModel):

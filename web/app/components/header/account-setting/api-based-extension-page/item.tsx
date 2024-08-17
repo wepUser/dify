@@ -8,7 +8,7 @@ import { Edit02 } from '@/app/components/base/icons/src/vender/line/general'
 import type { ApiBasedExtension } from '@/models/common'
 import { useModalContext } from '@/context/modal-context'
 import { deleteApiBasedExtension } from '@/service/common'
-import Confirm from '@/app/components/base/confirm'
+import ConfirmCommon from '@/app/components/base/confirm/common'
 
 type ItemProps = {
   data: ApiBasedExtension
@@ -57,14 +57,18 @@ const Item: FC<ItemProps> = ({
         </div>
       </div>
       {
-        showDeleteConfirm
-          && <Confirm
+        showDeleteConfirm && (
+          <ConfirmCommon
+            type='danger'
             isShow={showDeleteConfirm}
             onCancel={() => setShowDeleteConfirm(false)}
             title={`${t('common.operation.delete')} “${data.name}”?`}
             onConfirm={handleDeleteApiBasedExtension}
+            confirmWrapperClassName='!z-30'
             confirmText={t('common.operation.delete') || ''}
+            confirmBtnClassName='!bg-[#D92D20]'
           />
+        )
       }
     </div>
   )

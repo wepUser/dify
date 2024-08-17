@@ -14,7 +14,6 @@ import AddModelButton from './add-model-button'
 import ModelListItem from './model-list-item'
 import { ChevronDownDouble } from '@/app/components/base/icons/src/vender/line/arrows'
 import { useModalContextSelector } from '@/context/modal-context'
-import { useAppContext } from '@/context/app-context'
 
 type ModelListProps = {
   provider: ModelProvider
@@ -32,7 +31,6 @@ const ModelList: FC<ModelListProps> = ({
 }) => {
   const { t } = useTranslation()
   const configurativeMethods = provider.configurate_methods.filter(method => method !== ConfigurationMethodEnum.fetchFromRemote)
-  const { isCurrentWorkspaceManager } = useAppContext()
   const isConfigurable = configurativeMethods.includes(ConfigurationMethodEnum.customizableModel)
 
   const setShowModelLoadBalancingModal = useModalContextSelector(state => state.setShowModelLoadBalancingModal)
@@ -70,7 +68,7 @@ const ModelList: FC<ModelListProps> = ({
             )
           } */}
           {
-            isConfigurable && isCurrentWorkspaceManager && (
+            isConfigurable && (
               <div className='grow flex justify-end'>
                 <AddModelButton onClick={() => onConfig()} />
               </div>

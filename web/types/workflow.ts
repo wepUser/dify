@@ -1,9 +1,7 @@
 import type { Viewport } from 'reactflow'
 import type {
   BlockEnum,
-  ConversationVariable,
   Edge,
-  EnvironmentVariable,
   Node,
 } from '@/app/components/workflow/types'
 
@@ -24,8 +22,7 @@ export type NodeTracing = {
     total_tokens: number
     total_price: number
     currency: string
-    iteration_id?: string
-    iteration_index?: number
+    steps_boundary: number[]
   }
   metadata: {
     iterator_length: number
@@ -59,8 +56,6 @@ export type FetchWorkflowDraftResponse = {
   hash: string
   updated_at: number
   tool_published: boolean
-  environment_variables?: EnvironmentVariable[]
-  conversation_variables?: ConversationVariable[]
 }
 
 export type NodeTracingListResponse = {
@@ -243,11 +238,3 @@ export type NodesDefaultConfigsResponse = {
   type: string
   config: any
 }[]
-
-export type ConversationVariableResponse = {
-  data: (ConversationVariable & { updated_at: number; created_at: number })[]
-  has_more: boolean
-  limit: number
-  total: number
-  page: number
-}

@@ -4,6 +4,7 @@ import {
   useCallback,
 } from 'react'
 import { useTranslation } from 'react-i18next'
+import cn from 'classnames'
 import {
   RiCursorLine,
   RiFunctionAddLine,
@@ -16,12 +17,11 @@ import {
   useSelectionInteractions,
   useWorkflow,
 } from '../hooks'
-import { getKeyboardKeyCodeBySystem, isEventTargetInputArea } from '../utils'
+import { isEventTargetInputArea } from '../utils'
 import { useStore } from '../store'
 import AddBlock from './add-block'
 import TipPopup from './tip-popup'
 import { useOperator } from './hooks'
-import cn from '@/utils/classnames'
 
 const Control = () => {
   const { t } = useTranslation()
@@ -78,11 +78,6 @@ const Control = () => {
     handleLayout()
   }
 
-  useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.o`, (e) => {
-    e.preventDefault()
-    goLayout()
-  }, { exactMatch: true, useCapture: true })
-
   const addNote = (e: MouseEvent<HTMLDivElement>) => {
     if (getNodesReadOnly())
       return
@@ -106,7 +101,7 @@ const Control = () => {
         </div>
       </TipPopup>
       <div className='mx-[3px] w-[1px] h-3.5 bg-gray-200'></div>
-      <TipPopup title={t('workflow.common.pointerMode')} shortcuts={['v']}>
+      <TipPopup title={t('workflow.common.pointerMode')}>
         <div
           className={cn(
             'flex items-center justify-center mr-[1px] w-8 h-8 rounded-lg cursor-pointer',
@@ -118,7 +113,7 @@ const Control = () => {
           <RiCursorLine className='w-4 h-4' />
         </div>
       </TipPopup>
-      <TipPopup title={t('workflow.common.handMode')} shortcuts={['h']}>
+      <TipPopup title={t('workflow.common.handMode')}>
         <div
           className={cn(
             'flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer',
@@ -131,7 +126,7 @@ const Control = () => {
         </div>
       </TipPopup>
       <div className='mx-[3px] w-[1px] h-3.5 bg-gray-200'></div>
-      <TipPopup title={t('workflow.panel.organizeBlocks')} shortcuts={['ctrl', 'o']}>
+      <TipPopup title={t('workflow.panel.organizeBlocks')}>
         <div
           className={cn(
             'flex items-center justify-center w-8 h-8 rounded-lg hover:bg-black/5 hover:text-gray-700 cursor-pointer',

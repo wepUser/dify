@@ -6,6 +6,7 @@ from core.app.app_config.entities import (
     DatasetRetrieveConfigEntity,
     EasyUIBasedAppConfig,
     ExternalDataVariableEntity,
+    FileExtraConfig,
     ModelConfigEntity,
     PromptTemplateEntity,
     VariableEntity,
@@ -13,7 +14,6 @@ from core.app.app_config.entities import (
 from core.app.apps.agent_chat.app_config_manager import AgentChatAppConfigManager
 from core.app.apps.chat.app_config_manager import ChatAppConfigManager
 from core.app.apps.completion.app_config_manager import CompletionAppConfigManager
-from core.file.file_obj import FileExtraConfig
 from core.helper import encrypter
 from core.model_runtime.entities.llm_entities import LLMMode
 from core.model_runtime.utils.encoders import jsonable_encoder
@@ -199,8 +199,7 @@ class WorkflowConverter:
             version='draft',
             graph=json.dumps(graph),
             features=json.dumps(features),
-            created_by=account_id,
-            environment_variables=[],
+            created_by=account_id
         )
 
         db.session.add(workflow)

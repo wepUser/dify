@@ -429,7 +429,6 @@ class ApiToolManageService:
                 db_provider=provider,
                 decrypt_credentials=True
             )
-            user_provider.labels = labels
 
             # add icon
             ToolTransformService.repack_provider(user_provider)

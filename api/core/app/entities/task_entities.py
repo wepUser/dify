@@ -69,7 +69,6 @@ class WorkflowTaskState(TaskState):
 
     iteration_nested_node_ids: list[str] = None
 
-
 class AdvancedChatTaskState(WorkflowTaskState):
     """
     AdvancedChatTaskState entity
@@ -87,8 +86,6 @@ class StreamEvent(Enum):
     ERROR = "error"
     MESSAGE = "message"
     MESSAGE_END = "message_end"
-    TTS_MESSAGE = "tts_message"
-    TTS_MESSAGE_END = "tts_message_end"
     MESSAGE_FILE = "message_file"
     MESSAGE_REPLACE = "message_replace"
     AGENT_THOUGHT = "agent_thought"
@@ -131,22 +128,6 @@ class MessageStreamResponse(StreamResponse):
     event: StreamEvent = StreamEvent.MESSAGE
     id: str
     answer: str
-
-
-class MessageAudioStreamResponse(StreamResponse):
-    """
-    MessageStreamResponse entity
-    """
-    event: StreamEvent = StreamEvent.TTS_MESSAGE
-    audio: str
-
-
-class MessageAudioEndStreamResponse(StreamResponse):
-    """
-    MessageStreamResponse entity
-    """
-    event: StreamEvent = StreamEvent.TTS_MESSAGE_END
-    audio: str
 
 
 class MessageEndStreamResponse(StreamResponse):
@@ -205,7 +186,6 @@ class WorkflowStartStreamResponse(StreamResponse):
     """
     WorkflowStartStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -225,7 +205,6 @@ class WorkflowFinishStreamResponse(StreamResponse):
     """
     WorkflowFinishStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -253,7 +232,6 @@ class NodeStartStreamResponse(StreamResponse):
     """
     NodeStartStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -295,7 +273,6 @@ class NodeFinishStreamResponse(StreamResponse):
     """
     NodeFinishStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -346,12 +323,10 @@ class NodeFinishStreamResponse(StreamResponse):
             }
         }
 
-
 class IterationNodeStartStreamResponse(StreamResponse):
     """
     NodeStartStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -369,12 +344,10 @@ class IterationNodeStartStreamResponse(StreamResponse):
     workflow_run_id: str
     data: Data
 
-
 class IterationNodeNextStreamResponse(StreamResponse):
     """
     NodeStartStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -392,12 +365,10 @@ class IterationNodeNextStreamResponse(StreamResponse):
     workflow_run_id: str
     data: Data
 
-
 class IterationNodeCompletedStreamResponse(StreamResponse):
     """
     NodeCompletedStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -422,12 +393,10 @@ class IterationNodeCompletedStreamResponse(StreamResponse):
     workflow_run_id: str
     data: Data
 
-
 class TextChunkStreamResponse(StreamResponse):
     """
     TextChunkStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -442,7 +411,6 @@ class TextReplaceStreamResponse(StreamResponse):
     """
     TextReplaceStreamResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -505,7 +473,6 @@ class ChatbotAppBlockingResponse(AppBlockingResponse):
     """
     ChatbotAppBlockingResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -525,7 +492,6 @@ class CompletionAppBlockingResponse(AppBlockingResponse):
     """
     CompletionAppBlockingResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -544,7 +510,6 @@ class WorkflowAppBlockingResponse(AppBlockingResponse):
     """
     WorkflowAppBlockingResponse entity
     """
-
     class Data(BaseModel):
         """
         Data entity
@@ -563,12 +528,10 @@ class WorkflowAppBlockingResponse(AppBlockingResponse):
     workflow_run_id: str
     data: Data
 
-
 class WorkflowIterationState(BaseModel):
     """
     WorkflowIterationState entity
     """
-
     class Data(BaseModel):
         """
         Data entity

@@ -10,10 +10,10 @@ import {
   fetchDataSourceNotionBinding,
   fetchFreeQuotaVerify,
 } from '@/service/common'
-import type { IConfirm } from '@/app/components/base/confirm'
-import Confirm from '@/app/components/base/confirm'
+import type { ConfirmCommonProps } from '@/app/components/base/confirm/common'
+import Confirm from '@/app/components/base/confirm/common'
 
-export type ConfirmType = Pick<IConfirm, 'type' | 'title' | 'content'>
+export type ConfirmType = Pick<ConfirmCommonProps, 'type' | 'title' | 'desc'>
 
 export const useAnthropicCheckPay = () => {
   const { t } = useTranslation()
@@ -25,7 +25,7 @@ export const useAnthropicCheckPay = () => {
   useEffect(() => {
     if (providerName === 'anthropic' && (paymentResult === 'succeeded' || paymentResult === 'cancelled')) {
       setConfirm({
-        type: paymentResult === 'succeeded' ? 'info' : 'warning',
+        type: paymentResult === 'succeeded' ? 'success' : 'danger',
         title: paymentResult === 'succeeded' ? t('common.actionMsg.paySucceeded') : t('common.actionMsg.payCancelled'),
       })
     }
@@ -44,7 +44,7 @@ export const useBillingPay = () => {
   useEffect(() => {
     if (paymentType === 'billing' && (paymentResult === 'succeeded' || paymentResult === 'cancelled')) {
       setConfirm({
-        type: paymentResult === 'succeeded' ? 'info' : 'warning',
+        type: paymentResult === 'succeeded' ? 'success' : 'danger',
         title: paymentResult === 'succeeded' ? t('common.actionMsg.paySucceeded') : t('common.actionMsg.payCancelled'),
       })
     }
@@ -96,7 +96,7 @@ export const useCheckFreeQuota = () => {
 
   useEffect(() => {
     if (error)
-      router.replace('/')
+      router.replace('/', { forceOptimisticNavigation: false })
   }, [error, router])
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export const useCheckFreeQuota = () => {
 
   return (data && provider)
     ? {
-      type: data.flag ? 'info' : 'warning',
+      type: data.flag ? 'success' : 'danger',
       title: data.flag ? QUOTA_RECEIVE_STATUS[provider as string].success[locale] : QUOTA_RECEIVE_STATUS[provider].fail[locale],
       desc: !data.flag ? data.reason : undefined,
     }
@@ -130,13 +130,13 @@ export const useCheckNotion = () => {
 
   useEffect(() => {
     if (data)
-      router.replace('/')
+      router.replace('/', { forceOptimisticNavigation: false })
   }, [data, router])
   useEffect(() => {
     if (type === 'notion') {
       if (notionError) {
         setConfirm({
-          type: 'warning',
+          type: 'danger',
           title: notionError,
         })
       }
@@ -160,7 +160,7 @@ export const CheckModal = () => {
 
   const handleCancelShowPayStatusModal = useCallback(() => {
     setShowPayStatusModal(false)
-    router.replace('/')
+    router.replace('/', { forceOptimisticNavigation: false })
   }, [router])
 
   const confirmInfo = anthropicConfirmInfo || freeQuotaConfirmInfo || notionConfirmInfo || billingConfirmInfo
@@ -173,11 +173,11 @@ export const CheckModal = () => {
       isShow
       onCancel={handleCancelShowPayStatusModal}
       onConfirm={handleCancelShowPayStatusModal}
-      showCancel={false}
-      type={confirmInfo.type === 'info' ? 'info' : 'warning' }
+      type={confirmInfo.type}
       title={confirmInfo.title}
-      content={(confirmInfo as { desc: string }).desc || ''}
-      confirmText={(confirmInfo.type === 'info' && t('common.operation.ok')) || ''}
+      desc={confirmInfo.desc}
+      showOperateCancel={false}
+      confirmText={(confirmInfo.type === 'danger' && t('common.operation.ok')) || ''}
     />
   )
 }

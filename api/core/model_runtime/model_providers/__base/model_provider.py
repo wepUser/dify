@@ -44,7 +44,7 @@ class ModelProvider(ABC):
     
         # read provider schema from yaml file
         yaml_path = os.path.join(current_path, f'{provider_name}.yaml')
-        yaml_data = load_yaml_file(yaml_path)
+        yaml_data = load_yaml_file(yaml_path, ignore_error=True)
     
         try:
             # yaml_data to entity

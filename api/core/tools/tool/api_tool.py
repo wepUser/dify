@@ -238,7 +238,7 @@ class ApiTool(Tool):
                     return int(value)
                 elif property['type'] == 'number':
                     # check if it is a float
-                    if '.' in str(value):
+                    if '.' in value:
                         return float(value)
                     else:
                         return int(value)

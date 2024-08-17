@@ -14,7 +14,7 @@ import {
 import { Lock01 } from '@/app/components/base/icons/src/vender/solid/security'
 import Button from '@/app/components/base/button'
 import { LinkExternal02 } from '@/app/components/base/icons/src/vender/line/general'
-import Confirm from '@/app/components/base/confirm'
+import ConfirmUi from '@/app/components/base/confirm'
 import { addTracingConfig, removeTracingConfig, updateTracingConfig } from '@/service/apps'
 import Toast from '@/app/components/base/toast'
 
@@ -276,8 +276,9 @@ const ProviderConfigModal: FC<Props> = ({
           </PortalToFollowElem>
         )
         : (
-          <Confirm
+          <ConfirmUi
             isShow
+            onClose={hideRemoveConfirm}
             type='warning'
             title={t(`${I18N_PREFIX}.removeConfirmTitle`, { key: t(`app.tracing.${type}.title`) })!}
             content={t(`${I18N_PREFIX}.removeConfirmContent`)}

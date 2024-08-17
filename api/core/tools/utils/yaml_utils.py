@@ -1,32 +1,35 @@
 import logging
-from typing import Any
+import os
 
 import yaml
 from yaml import YAMLError
 
 logger = logging.getLogger(__name__)
 
-
-def load_yaml_file(file_path: str, ignore_error: bool = True, default_value: Any = {}) -> Any:
+def load_yaml_file(file_path: str, ignore_error: bool = False) -> dict:
     """
-    Safe loading a YAML file
+    Safe loading a YAML file to a dict
     :param file_path: the path of the YAML file
     :param ignore_error:
-        if True, return default_value if error occurs and the error will be logged in debug level
+        if True, return empty dict if error occurs and the error will be logged in warning level
         if False, raise error if error occurs
-    :param default_value: the value returned when errors ignored
-    :return: an object of the YAML content
+    :return: a dict of the YAML content
     """
     try:
-        with open(file_path, encoding='utf-8') as yaml_file:
+        if not file_path or not os.path.exists(file_path):
+            raise FileNotFoundError(f'Failed to load YAML file {file_path}: file not found')
+
+        with open(file_path, encoding='utf-8') as file:
             try:
-                yaml_content = yaml.safe_load(yaml_file)
-                return yaml_content if yaml_content else default_value
+                return yaml.safe_load(file)
             except Exception as e:
                 raise YAMLError(f'Failed to load YAML file {file_path}: {e}')
+    except FileNotFoundError as e:
+        logger.debug(f'Failed to load YAML file {file_path}: {e}')
+        return {}
     except Exception as e:
         if ignore_error:
-            logger.debug(f'Failed to load YAML file {file_path}: {e}')
-            return default_value
+            logger.warning(f'Failed to load YAML file {file_path}: {e}')
+            return {}
         else:
             raise e

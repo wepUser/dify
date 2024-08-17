@@ -4,8 +4,7 @@ import json
 from flask_login import UserMixin
 
 from extensions.ext_database import db
-
-from .types import StringUUID
+from models import StringUUID
 
 
 class AccountStatus(str, enum.Enum):
@@ -49,7 +48,7 @@ class Account(UserMixin, db.Model):
         return self._current_tenant
 
     @current_tenant.setter
-    def current_tenant(self, value: "Tenant"):
+    def current_tenant(self, value):
         tenant = value
         ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=self.id).first()
         if ta:
@@ -63,7 +62,7 @@ class Account(UserMixin, db.Model):
         return self._current_tenant.id
 
     @current_tenant_id.setter
-    def current_tenant_id(self, value: str):
+    def current_tenant_id(self, value):
         try:
             tenant_account_join = db.session.query(Tenant, TenantAccountJoin) \
                 .filter(Tenant.id == value) \
@@ -80,10 +79,6 @@ class Account(UserMixin, db.Model):
             tenant = None
 
         self._current_tenant = tenant
-
-    @property
-    def current_role(self):
-        return self._current_tenant.current_role
 
     def get_status(self) -> AccountStatus:
         status_str = self.status
@@ -115,14 +110,6 @@ class Account(UserMixin, db.Model):
     def is_editor(self):
         return TenantAccountRole.is_editing_role(self._current_tenant.current_role)
 
-    @property
-    def is_dataset_editor(self):
-        return TenantAccountRole.is_dataset_edit_role(self._current_tenant.current_role)
-
-    @property
-    def is_dataset_operator(self):
-        return self._current_tenant.current_role == TenantAccountRole.DATASET_OPERATOR
-
 class TenantStatus(str, enum.Enum):
     NORMAL = 'normal'
     ARCHIVE = 'archive'
@@ -133,12 +120,10 @@ class TenantAccountRole(str, enum.Enum):
     ADMIN = 'admin'
     EDITOR = 'editor'
     NORMAL = 'normal'
-    DATASET_OPERATOR = 'dataset_operator'
 
     @staticmethod
     def is_valid_role(role: str) -> bool:
-        return role and role in {TenantAccountRole.OWNER, TenantAccountRole.ADMIN, TenantAccountRole.EDITOR,
-                                 TenantAccountRole.NORMAL, TenantAccountRole.DATASET_OPERATOR}
+        return role and role in {TenantAccountRole.OWNER, TenantAccountRole.ADMIN, TenantAccountRole.EDITOR, TenantAccountRole.NORMAL}
 
     @staticmethod
     def is_privileged_role(role: str) -> bool:
@@ -146,17 +131,12 @@ class TenantAccountRole(str, enum.Enum):
     
     @staticmethod
     def is_non_owner_role(role: str) -> bool:
-        return role and role in {TenantAccountRole.ADMIN, TenantAccountRole.EDITOR, TenantAccountRole.NORMAL,
-                                 TenantAccountRole.DATASET_OPERATOR}
+        return role and role in {TenantAccountRole.ADMIN, TenantAccountRole.EDITOR, TenantAccountRole.NORMAL}
     
     @staticmethod
     def is_editing_role(role: str) -> bool:
         return role and role in {TenantAccountRole.OWNER, TenantAccountRole.ADMIN, TenantAccountRole.EDITOR}
 
-    @staticmethod
-    def is_dataset_edit_role(role: str) -> bool:
-        return role and role in {TenantAccountRole.OWNER, TenantAccountRole.ADMIN, TenantAccountRole.EDITOR,
-                                 TenantAccountRole.DATASET_OPERATOR}
 
 class Tenant(db.Model):
     __tablename__ = 'tenants'
@@ -192,7 +172,6 @@ class TenantAccountJoinRole(enum.Enum):
     OWNER = 'owner'
     ADMIN = 'admin'
     NORMAL = 'normal'
-    DATASET_OPERATOR = 'dataset_operator'
 
 
 class TenantAccountJoin(db.Model):

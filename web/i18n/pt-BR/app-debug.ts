@@ -322,9 +322,6 @@ const translation = {
       language: 'línguas',
       resolutionTooltip: 'Texto para voz timbre suporta idiomas.',
       voice: 'voz',
-      autoPlay: 'Reprodução automática',
-      autoPlayEnabled: 'ligar',
-      autoPlayDisabled: 'fecho',
     },
   },
   openingStatement: {

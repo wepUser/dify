@@ -7,5 +7,4 @@ def handle(sender, **kwargs):
     document_id = sender
     dataset_id = kwargs.get('dataset_id')
     doc_form = kwargs.get('doc_form')
-    file_id = kwargs.get('file_id')
-    clean_document_task.delay(document_id, dataset_id, doc_form, file_id)
+    clean_document_task.delay(document_id, dataset_id, doc_form)

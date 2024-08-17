@@ -6,8 +6,6 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { produce, setAutoFreeze } from 'immer'
-import { useParams, usePathname } from 'next/navigation'
-import { v4 as uuidV4 } from 'uuid'
 import type {
   ChatConfig,
   ChatItem,
@@ -22,7 +20,6 @@ import { replaceStringWithValues } from '@/app/components/app/configuration/prom
 import type { Annotation } from '@/models/log'
 import { WorkflowRunningStatus } from '@/app/components/workflow/types'
 import useTimestamp from '@/hooks/use-timestamp'
-import { AudioPlayerManager } from '@/app/components/base/audio-btn/audio.player.manager'
 
 type GetAbortController = (abortController: AbortController) => void
 type SendCallback = {
@@ -83,7 +80,7 @@ export const useChat = (
   const { t } = useTranslation()
   const { formatTime } = useTimestamp()
   const { notify } = useToastContext()
-  const conversationId = useRef('')
+  const connversationId = useRef('')
   const hasStopResponded = useRef(false)
   const [isResponding, setIsResponding] = useState(false)
   const isRespondingRef = useRef(false)
@@ -94,8 +91,7 @@ export const useChat = (
   const conversationMessagesAbortControllerRef = useRef<AbortController | null>(null)
   const suggestedQuestionsAbortControllerRef = useRef<AbortController | null>(null)
   const checkPromptVariables = useCheckPromptVariables()
-  const params = useParams()
-  const pathname = usePathname()
+
   useEffect(() => {
     setAutoFreeze(false)
     return () => {
@@ -152,7 +148,7 @@ export const useChat = (
   }, [stopChat, handleResponding])
 
   const handleRestart = useCallback(() => {
-    conversationId.current = ''
+    connversationId.current = ''
     taskIdRef.current = ''
     handleStop()
     const newChatList = config?.opening_statement
@@ -248,7 +244,7 @@ export const useChat = (
 
     const bodyParams = {
       response_mode: 'streaming',
-      conversation_id: conversationId.current,
+      conversation_id: connversationId.current,
       ...data,
     }
     if (bodyParams?.files?.length) {
@@ -266,19 +262,6 @@ export const useChat = (
     let isAgentMode = false
     let hasSetResponseId = false
 
-    let ttsUrl = ''
-    let ttsIsPublic = false
-    if (params.token) {
-      ttsUrl = '/text-to-audio'
-      ttsIsPublic = true
-    }
-    else if (params.appId) {
-      if (pathname.search('explore/installed') > -1)
-        ttsUrl = `/installed-apps/${params.appId}/text-to-audio`
-      else
-        ttsUrl = `/apps/${params.appId}/text-to-audio`
-    }
-    const player = AudioPlayerManager.getInstance().getAudioPlayer(ttsUrl, ttsIsPublic, uuidV4(), 'none', 'none', (_: any): any => {})
     ssePost(
       url,
       {
@@ -302,7 +285,7 @@ export const useChat = (
           }
 
           if (isFirstMessage && newConversationId)
-            conversationId.current = newConversationId
+            connversationId.current = newConversationId
 
           taskIdRef.current = taskId
           if (messageId)
@@ -322,11 +305,11 @@ export const useChat = (
             return
 
           if (onConversationComplete)
-            onConversationComplete(conversationId.current)
+            onConversationComplete(connversationId.current)
 
-          if (conversationId.current && !hasStopResponded.current && onGetConvesationMessages) {
+          if (connversationId.current && !hasStopResponded.current && onGetConvesationMessages) {
             const { data }: any = await onGetConvesationMessages(
-              conversationId.current,
+              connversationId.current,
               newAbortController => conversationMessagesAbortControllerRef.current = newAbortController,
             )
             const newResponseItem = data.find((item: any) => item.id === responseItem.id)
@@ -361,7 +344,7 @@ export const useChat = (
                     latency: newResponseItem.provider_response_latency.toFixed(2),
                   },
                   // for agent log
-                  conversationId: conversationId.current,
+                  conversationId: connversationId.current,
                   input: {
                     inputs: newResponseItem.inputs,
                     query: newResponseItem.query,
@@ -547,15 +530,6 @@ export const useChat = (
             }
           }))
         },
-        onTTSChunk: (messageId: string, audio: string) => {
-          if (!audio || audio === '')
-            return
-          player.playAudioWithAudio(audio, true)
-          AudioPlayerManager.getInstance().resetMsgId(messageId)
-        },
-        onTTSEnd: (messageId: string, audio: string) => {
-          player.playAudioWithAudio(audio, false)
-        },
       })
     return true
   }, [
@@ -640,7 +614,7 @@ export const useChat = (
   return {
     chatList,
     setChatList,
-    conversationId: conversationId.current,
+    conversationId: connversationId.current,
     isResponding,
     setIsResponding,
     handleSend,

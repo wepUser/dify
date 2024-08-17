@@ -2,7 +2,8 @@ import json
 import logging
 from typing import Optional, Union
 
-from configs import dify_config
+from flask import current_app
+
 from core.tools.entities.api_entities import UserTool, UserToolProvider
 from core.tools.entities.common_entities import I18nObject
 from core.tools.entities.tool_bundle import ApiToolBundle
@@ -28,7 +29,7 @@ class ToolTransformService:
         """
             get tool provider icon url
         """
-        url_prefix = (dify_config.CONSOLE_API_URL
+        url_prefix = (current_app.config.get("CONSOLE_API_URL")
                       + "/console/api/workspaces/current/tool-provider/")
         
         if provider_type == ToolProviderType.BUILT_IN.value:

@@ -59,7 +59,7 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         if not endpoint_url.endswith('/'):
             endpoint_url += '/'
 
-        endpoint_url = urljoin(endpoint_url, 'api/embed')
+        endpoint_url = urljoin(endpoint_url, 'api/embeddings')
 
         # get model properties
         context_size = self._get_context_size(model, credentials)
@@ -72,34 +72,38 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
             num_tokens = self._get_num_tokens_by_gpt2(text)
 
             if num_tokens >= context_size:
-                cutoff = int(np.floor(len(text) * (context_size / num_tokens)))
+                cutoff = int(len(text) * (np.floor(context_size / num_tokens)))
                 # if num tokens is larger than context length, only use the start
                 inputs.append(text[0: cutoff])
             else:
                 inputs.append(text)
 
-        # Prepare the payload for the request
-        payload = {
-            'input': inputs,
-            'model': model,
-        }
+        batched_embeddings = []
 
-        # Make the request to the OpenAI API
-        response = requests.post(
-            endpoint_url,
-            headers=headers,
-            data=json.dumps(payload),
-            timeout=(10, 300)
-        )
+        for text in inputs:
+            # Prepare the payload for the request
+            payload = {
+                'prompt': text,
+                'model': model,
+            }
 
-        response.raise_for_status()  # Raise an exception for HTTP errors
-        response_data = response.json()
+            # Make the request to the OpenAI API
+            response = requests.post(
+                endpoint_url,
+                headers=headers,
+                data=json.dumps(payload),
+                timeout=(10, 300)
+            )
 
-        # Extract embeddings and used tokens from the response
-        embeddings = response_data['embeddings']
-        embedding_used_tokens = self.get_num_tokens(model, credentials, inputs)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            response_data = response.json()
 
-        used_tokens += embedding_used_tokens
+            # Extract embeddings and used tokens from the response
+            embeddings = response_data['embedding']
+            embedding_used_tokens = self.get_num_tokens(model, credentials, [text])
+
+            used_tokens += embedding_used_tokens
+            batched_embeddings.append(embeddings)
 
         # calc usage
         usage = self._calc_response_usage(
@@ -109,7 +113,7 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         )
 
         return TextEmbeddingResult(
-            embeddings=embeddings,
+            embeddings=batched_embeddings,
             usage=usage,
             model=model
         )

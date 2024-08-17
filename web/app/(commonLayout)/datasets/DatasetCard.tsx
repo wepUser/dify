@@ -1,13 +1,13 @@
 'use client'
 
 import { useContext } from 'use-context-selector'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import cn from 'classnames'
 import {
   RiMoreFill,
 } from '@remixicon/react'
-import cn from '@/utils/classnames'
 import Confirm from '@/app/components/base/confirm'
 import { ToastContext } from '@/app/components/base/toast'
 import { checkIsUsedInApp, deleteDataset } from '@/service/datasets'
@@ -20,7 +20,6 @@ import Divider from '@/app/components/base/divider'
 import RenameDatasetModal from '@/app/components/datasets/rename-modal'
 import type { Tag } from '@/app/components/base/tag-management/constant'
 import TagSelector from '@/app/components/base/tag-management/selector'
-import { useAppContext } from '@/context/app-context'
 
 export type DatasetCardProps = {
   dataset: DataSet
@@ -33,9 +32,6 @@ const DatasetCard = ({
 }: DatasetCardProps) => {
   const { t } = useTranslation()
   const { notify } = useContext(ToastContext)
-  const { push } = useRouter()
-
-  const { isCurrentWorkspaceDatasetOperator } = useAppContext()
   const [tags, setTags] = useState<Tag[]>(dataset.tags)
 
   const [showRenameModal, setShowRenameModal] = useState(false)
@@ -65,7 +61,7 @@ const DatasetCard = ({
     setShowConfirmDelete(false)
   }, [dataset.id, notify, onSuccess, t])
 
-  const Operations = (props: HtmlContentProps & { showDelete: boolean }) => {
+  const Operations = (props: HtmlContentProps) => {
     const onMouseLeave = async () => {
       props.onClose?.()
     }
@@ -86,19 +82,15 @@ const DatasetCard = ({
         <div className='h-8 py-[6px] px-3 mx-1 flex items-center gap-2 hover:bg-gray-100 rounded-lg cursor-pointer' onClick={onClickRename}>
           <span className='text-gray-700 text-sm'>{t('common.operation.settings')}</span>
         </div>
-        {props.showDelete && (
-          <>
-            <Divider className="!my-1" />
-            <div
-              className='group h-8 py-[6px] px-3 mx-1 flex items-center gap-2 hover:bg-red-50 rounded-lg cursor-pointer'
-              onClick={onClickDelete}
-            >
-              <span className={cn('text-gray-700 text-sm', 'group-hover:text-red-500')}>
-                {t('common.operation.delete')}
-              </span>
-            </div>
-          </>
-        )}
+        <Divider className="!my-1" />
+        <div
+          className='group h-8 py-[6px] px-3 mx-1 flex items-center gap-2 hover:bg-red-50 rounded-lg cursor-pointer'
+          onClick={onClickDelete}
+        >
+          <span className={cn('text-gray-700 text-sm', 'group-hover:text-red-500')}>
+            {t('common.operation.delete')}
+          </span>
+        </div>
       </div>
     )
   }
@@ -109,13 +101,10 @@ const DatasetCard = ({
 
   return (
     <>
-      <div
-        className='group col-span-1 bg-white border-2 border-solid border-transparent rounded-xl shadow-sm min-h-[160px] flex flex-col transition-all duration-200 ease-in-out cursor-pointer hover:shadow-lg'
+      <Link
+        href={`/datasets/${dataset.id}/documents`}
+        className='group flex col-span-1 bg-white border-2 border-solid border-transparent rounded-xl shadow-sm min-h-[160px] flex flex-col transition-all duration-200 ease-in-out cursor-pointer hover:shadow-lg'
         data-disable-nprogress={true}
-        onClick={(e) => {
-          e.preventDefault()
-          push(`/datasets/${dataset.id}/documents`)
-        }}
       >
         <div className='flex pt-[14px] px-[14px] pb-3 h-[66px] items-center gap-3 grow-0 shrink-0'>
           <div className={cn(
@@ -185,7 +174,7 @@ const DatasetCard = ({
           <div className='!hidden group-hover:!flex shrink-0 mx-1 w-[1px] h-[14px] bg-gray-200' />
           <div className='!hidden group-hover:!flex shrink-0'>
             <CustomPopover
-              htmlContent={<Operations showDelete={!isCurrentWorkspaceDatasetOperator} />}
+              htmlContent={<Operations />}
               position="br"
               trigger="click"
               btnElement={
@@ -205,7 +194,7 @@ const DatasetCard = ({
             />
           </div>
         </div>
-      </div>
+      </Link>
       {showRenameModal && (
         <RenameDatasetModal
           show={showRenameModal}
@@ -219,6 +208,7 @@ const DatasetCard = ({
           title={t('dataset.deleteDatasetConfirmTitle')}
           content={confirmMessage}
           isShow={showConfirmDelete}
+          onClose={() => setShowConfirmDelete(false)}
           onConfirm={onConfirmDelete}
           onCancel={() => setShowConfirmDelete(false)}
         />
