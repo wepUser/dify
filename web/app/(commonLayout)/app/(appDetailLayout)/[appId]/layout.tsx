@@ -59,16 +59,16 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
         ? [{
           name: t('common.appMenus.promptEng'),
           href: `/app/${appId}/${(mode === 'workflow' || mode === 'advanced-chat') ? 'workflow' : 'configuration'}`,
-          icon: RiTerminalWindowLine,
-          selectedIcon: RiTerminalWindowFill,
+          icon: RiTerminalWindowLine as NavIcon,
+          selectedIcon: RiTerminalWindowFill as NavIcon,
         }]
         : []
       ),
       {
         name: t('common.appMenus.apiAccess'),
         href: `/app/${appId}/develop`,
-        icon: RiTerminalBoxLine,
-        selectedIcon: RiTerminalBoxFill,
+        icon: RiTerminalBoxLine as NavIcon,
+        selectedIcon: RiTerminalBoxFill as NavIcon,
       },
       ...(isCurrentWorkspaceManager
         ? [{
@@ -76,16 +76,16 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
             ? t('common.appMenus.logAndAnn')
             : t('common.appMenus.logs'),
           href: `/app/${appId}/logs`,
-          icon: RiFileList3Line,
-          selectedIcon: RiFileList3Fill,
+          icon: RiFileList3Line as NavIcon,
+          selectedIcon: RiFileList3Fill as NavIcon,
         }]
         : []
       ),
       {
         name: t('common.appMenus.overview'),
         href: `/app/${appId}/overview`,
-        icon: RiDashboard2Line,
-        selectedIcon: RiDashboard2Fill,
+        icon: RiDashboard2Line as NavIcon,
+        selectedIcon: RiDashboard2Fill as NavIcon,
       },
     ]
     return navs
@@ -93,7 +93,7 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
 
   useEffect(() => {
     if (appDetail) {
-      document.title = `${(appDetail.name || 'App')} - Dify`
+      document.title = `${(appDetail.name || 'App')} - Haizhi`
       const localeMode = localStorage.getItem('app-detail-collapse-or-expand') || 'expand'
       const mode = isMobile ? 'collapse' : 'expand'
       setAppSiderbarExpand(isMobile ? mode : localeMode)

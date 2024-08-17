@@ -106,7 +106,7 @@ const Answer: FC<AnswerProps> = ({
           <div
             ref={contentRef}
             className={`
-              relative inline-block px-4 py-3 max-w-full bg-gray-100 rounded-b-2xl rounded-tr-2xl text-sm text-gray-900
+              relative inline-block px-4 py-3 max-w-full bg-gray-100 rounded-b-2xl rounded-tr-2xl text-base text-gray-900
               ${workflowProcess && 'w-full'}
             `}
           >

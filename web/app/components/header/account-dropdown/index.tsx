@@ -1,23 +1,20 @@
 'use client'
 import { useTranslation } from 'react-i18next'
 import { Fragment, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useContext } from 'use-context-selector'
 import classNames from 'classnames'
 import { RiArrowDownSLine } from '@remixicon/react'
-import Link from 'next/link'
 import { Menu, Transition } from '@headlessui/react'
-import Indicator from '../indicator'
 import AccountAbout from '../account-about'
 import WorkplaceSelector from './workplace-selector'
 import I18n from '@/context/i18n'
 import Avatar from '@/app/components/base/avatar'
 import { logout } from '@/service/common'
 import { useAppContext } from '@/context/app-context'
-import { ArrowUpRight } from '@/app/components/base/icons/src/vender/line/arrows'
 import { LogOut01 } from '@/app/components/base/icons/src/vender/line/general'
 import { useModalContext } from '@/context/modal-context'
-import { LanguagesSupported } from '@/i18n/language'
+import { isConsolePage } from '@/utils/routerJupgement'
 export type IAppSelecotr = {
   isMobile: boolean
 }
@@ -29,7 +26,8 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
   `
   const router = useRouter()
   const [aboutVisible, setAboutVisible] = useState(false)
-
+  const applyType = isConsolePage(usePathname())
+  const [isConsole, setConsole] = useState(applyType)
   const { locale } = useContext(I18n)
   const { t } = useTranslation()
   const { userProfile, langeniusVersionInfo } = useAppContext()
@@ -45,6 +43,10 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
       localStorage.removeItem('console_token')
 
     router.push('/signin')
+  }
+  const handleApplyType = (type: boolean) => {
+    setConsole(type)
+    router.push(type ? '/apps' : '/brain/apps')
   }
 
   return (
@@ -101,11 +103,26 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                   </div>
                   <div className="px-1 py-1">
                     <Menu.Item>
-                      <div className={itemClassName} onClick={() => setShowAccountSettingModal({ payload: 'account' })}>
-                        <div>{t('common.userProfile.settings')}</div>
-                      </div>
+                      {
+                        isConsole
+                          ? <div
+                            onClick={() => handleApplyType(false)}
+                            className={classNames(itemClassName, 'group justify-between')}>{t('common.userProfile.frontEnd')}</div>
+                          : <div
+                            onClick={() => handleApplyType(true)}
+                            className={classNames(itemClassName, 'group justify-between')}>{t('common.userProfile.console')}</div>
+                      }
                     </Menu.Item>
-                    <Menu.Item>
+                    {
+                      isConsole
+                        ? <Menu.Item>
+                          <div className={itemClassName} onClick={() => setShowAccountSettingModal({ payload: 'account' })}>
+                            <div>{t('common.userProfile.settings')}</div>
+                          </div>
+                        </Menu.Item>
+                        : ''
+                    }
+                    {/* <Menu.Item>
                       <Link
                         className={classNames(itemClassName, 'group justify-between')}
                         href='https://github.com/langgenius/dify/discussions/categories/feedbacks'
@@ -113,27 +130,27 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                         <div>{t('common.userProfile.roadmapAndFeedback')}</div>
                         <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' />
                       </Link>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <Link
-                        className={classNames(itemClassName, 'group justify-between')}
-                        href='https://discord.gg/5AEfbxcd9k'
-                        target='_blank' rel='noopener noreferrer'>
-                        <div>{t('common.userProfile.community')}</div>
-                        <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' />
-                      </Link>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <Link
-                        className={classNames(itemClassName, 'group justify-between')}
-                        href={
-                          locale !== LanguagesSupported[1] ? 'https://docs.dify.ai/' : `https://docs.dify.ai/v/${locale.toLowerCase()}/`
-                        }
-                        target='_blank' rel='noopener noreferrer'>
-                        <div>{t('common.userProfile.helpCenter')}</div>
-                        <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' />
-                      </Link>
-                    </Menu.Item>
+                    </Menu.Item> */}
+                    {/* <Menu.Item> */}
+                    {/*  <Link */}
+                    {/*    className={classNames(itemClassName, 'group justify-between')} */}
+                    {/*    href='https://discord.gg/5AEfbxcd9k' */}
+                    {/*    target='_blank' rel='noopener noreferrer'> */}
+                    {/*    <div>{t('common.userProfile.community')}</div> */}
+                    {/*    <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' /> */}
+                    {/*  </Link> */}
+                    {/* </Menu.Item> */}
+                    {/* <Menu.Item> */}
+                    {/*  <Link */}
+                    {/*    className={classNames(itemClassName, 'group justify-between')} */}
+                    {/*    href={ */}
+                    {/*      locale !== LanguagesSupported[1] ? 'https://docs.dify.ai/' : `https://docs.dify.ai/v/${locale.toLowerCase()}/` */}
+                    {/*    } */}
+                    {/*    target='_blank' rel='noopener noreferrer'> */}
+                    {/*    <div>{t('common.userProfile.helpCenter')}</div> */}
+                    {/*    <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' /> */}
+                    {/*  </Link> */}
+                    {/* </Menu.Item> */}
                     {
                       document?.body?.getAttribute('data-public-site-about') !== 'hide' && (
                         <Menu.Item>
@@ -141,7 +158,8 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                             <div>{t('common.userProfile.about')}</div>
                             <div className='flex items-center'>
                               <div className='mr-2 text-xs font-normal text-gray-500'>{langeniusVersionInfo.current_version}</div>
-                              <Indicator color={langeniusVersionInfo.current_version === langeniusVersionInfo.latest_version ? 'green' : 'orange'} />
+                              {/* <div className='mr-2 text-xs font-normal text-gray-500'>0.1.0</div> */}
+                              {/* <Indicator color={langeniusVersionInfo.current_version === langeniusVersionInfo.latest_version ? 'green' : 'orange'} /> */}
                             </div>
                           </div>
                         </Menu.Item>

@@ -63,7 +63,7 @@ const ConfigPanel = () => {
             !showConfigPanelBeforeChat && collapsed && (
               <>
                 <Star06 className='mr-1 mt-1 w-4 h-4 text-indigo-600' />
-                <div className='grow py-[3px] text-[13px] text-indigo-600 leading-[18px] font-medium'>
+                <div className='grow py-[3px] text-[14px] text-indigo-600 leading-[18px] font-medium'>
                   {t('share.chat.configStatusDes')}
                 </div>
                 <Button
@@ -82,7 +82,7 @@ const ConfigPanel = () => {
             !showConfigPanelBeforeChat && !collapsed && (
               <>
                 <Star06 className='mr-1 mt-1 w-4 h-4 text-indigo-600' />
-                <div className='grow py-[3px] text-[13px] text-indigo-600 leading-[18px] font-medium'>
+                <div className='grow py-[3px] text-[14px] text-indigo-600 leading-[18px] font-medium'>
                   {t('share.chat.privatePromptConfigTitle')}
                 </div>
               </>

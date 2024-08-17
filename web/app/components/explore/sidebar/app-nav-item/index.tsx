@@ -1,12 +1,13 @@
 'use client'
 import cn from 'classnames'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useHover } from 'ahooks'
 import s from './style.module.css'
 import ItemOperation from '@/app/components/explore/item-operation'
 import AppIcon from '@/app/components/base/app-icon'
+import { isConsolePage } from '@/utils/routerJupgement'
 
 export type IAppNavItemProps = {
   isMobile: boolean
@@ -33,8 +34,10 @@ export default function AppNavItem({
   uninstallable,
   onDelete,
 }: IAppNavItemProps) {
+  const applyType = isConsolePage(usePathname())
+  const [isConsole] = useState(applyType)
   const router = useRouter()
-  const url = `/explore/installed/${id}`
+  const url = `/${isConsole ? 'explore' : 'brain'}/installed/${id}`
   const ref = useRef(null)
   const isHovering = useHover(ref)
   return (
@@ -44,7 +47,7 @@ export default function AppNavItem({
       className={cn(
         s.item,
         isSelected ? s.active : 'hover:bg-gray-200',
-        'flex h-8 items-center justify-between mobile:justify-center px-2 mobile:px-1 rounded-lg text-sm font-normal',
+        'flex h-8 items-center justify-between mobile:justify-center px-2 mobile:px-1 rounded-lg text-base font-normal',
       )}
       onClick={() => {
         router.push(url) // use Link causes popup item always trigger jump. Can not be solved by e.stopPropagation().

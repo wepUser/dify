@@ -1,6 +1,7 @@
 'use client'
 import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import ExploreContext from '@/context/explore-context'
 import Sidebar from '@/app/components/explore/sidebar'
@@ -16,13 +17,14 @@ const Explore: FC<IExploreProps> = ({
   children,
 }) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const [controlUpdateInstalledApps, setControlUpdateInstalledApps] = useState(0)
   const { userProfile } = useAppContext()
   const [hasEditPermission, setHasEditPermission] = useState(false)
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([])
 
   useEffect(() => {
-    document.title = `${t('explore.title')} -  Dify`;
+    document.title = `${t('explore.title')} -  haizhi`;
     (async () => {
       const { accounts } = await fetchMembers({ url: '/workspaces/current/members', params: {} })
       if (!accounts)
@@ -33,7 +35,7 @@ const Explore: FC<IExploreProps> = ({
   }, [])
 
   return (
-    <div className='flex h-full bg-gray-100 border-t border-gray-200 overflow-hidden'>
+    <div className='flex h-full border-t border-gray-200 overflow-hidden'>
       <ExploreContext.Provider
         value={
           {
@@ -46,7 +48,7 @@ const Explore: FC<IExploreProps> = ({
         }
       >
         <Sidebar controlUpdateInstalledApps={controlUpdateInstalledApps} />
-        <div className='grow w-0'>
+        <div className='grow w-0 relative'>
           {children}
         </div>
       </ExploreContext.Provider>

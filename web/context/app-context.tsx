@@ -93,7 +93,7 @@ export const AppContextProvider: FC<AppContextProviderProps> = ({ children }) =>
     if (userProfileResponse && !userProfileResponse.bodyUsed) {
       const result = await userProfileResponse.json()
       setUserProfile(result)
-      const current_version = userProfileResponse.headers.get('x-version')
+      const current_version = process.env.NEXT_PUBLIC_APP_VERSION || userProfileResponse.headers.get('x-version')
       const current_env = process.env.NODE_ENV === 'development' ? 'DEVELOPMENT' : userProfileResponse.headers.get('x-env')
       const versionData = await fetchLanggeniusVersion({ url: '/version', params: { current_version } })
       setLangeniusVersionInfo({ ...versionData, current_version, latest_version: versionData.version, current_env })
@@ -129,7 +129,7 @@ export const AppContextProvider: FC<AppContextProviderProps> = ({ children }) =>
     }}>
       <div className='flex flex-col h-full overflow-y-auto'>
         {globalThis.document?.body?.getAttribute('data-public-maintenance-notice') && <MaintenanceNotice />}
-        <div ref={pageContainerRef} className='grow relative flex flex-col overflow-y-auto overflow-x-hidden bg-gray-100'>
+        <div ref={pageContainerRef} className='grow relative flex flex-col overflow-y-auto overflow-x-hidden' style={{ background: 'radial-gradient(169.51% 100% at 69.97% 0, #c9f8dc 0, #e3f7ea 14.12%, #f3f4f9 41.92%)' }}>
           {children}
         </div>
       </div>

@@ -70,7 +70,7 @@ const Sidebar = () => {
               icon={appData?.site.icon}
               background={appData?.site.icon_background}
             />
-            <div className='py-1 text-base font-semibold text-gray-800'>
+            <div className='py-1 text-xl font-semibold text-gray-800'>
               {appData?.site.title}
             </div>
           </div>
@@ -79,7 +79,7 @@ const Sidebar = () => {
       <div className='shrink-0 p-4'>
         <Button
           variant='secondary-accent'
-          className='justify-start w-full'
+          className='justify-start w-full text-base'
           onClick={handleNewConversation}
         >
           <Edit05 className='mr-2 w-4 h-4' />
@@ -113,7 +113,7 @@ const Sidebar = () => {
           )
         }
       </div>
-      <div className='px-4 pb-4 text-xs text-gray-400'>
+      <div className='px-4 pb-4 text-base text-gray-400'>
         © {appData?.site.copyright || appData?.site.title} {(new Date()).getFullYear()}
       </div>
       {!!showConfirm && (

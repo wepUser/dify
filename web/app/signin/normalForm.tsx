@@ -96,7 +96,7 @@ const NormalForm = () => {
       })
       if (res.result === 'success') {
         localStorage.setItem('console_token', res.data)
-        router.replace('/apps')
+        router.replace('/brain/apps')
       }
       else {
         Toast.notify({
@@ -144,10 +144,10 @@ const NormalForm = () => {
 
   return (
     <>
-      <div className="w-full mx-auto">
+      {/* <div className="w-full mx-auto">
         <h2 className="text-[32px] font-bold text-gray-900">{t('login.pageTitle')}</h2>
         <p className='mt-1 text-sm text-gray-600'>{t('login.welcome')}</p>
-      </div>
+      </div> */}
 
       <div className="w-full mx-auto mt-8">
         <div className="bg-white ">
@@ -267,21 +267,21 @@ const NormalForm = () => {
             </>
           }
           {/*  agree to our Terms and Privacy Policy. */}
-          <div className="w-hull text-center block mt-2 text-xs text-gray-600">
-            {t('login.tosDesc')}
-            &nbsp;
-            <Link
-              className='text-primary-600'
-              target='_blank' rel='noopener noreferrer'
-              href='https://dify.ai/terms'
-            >{t('login.tos')}</Link>
-            &nbsp;&&nbsp;
-            <Link
-              className='text-primary-600'
-              target='_blank' rel='noopener noreferrer'
-              href='https://dify.ai/privacy'
-            >{t('login.pp')}</Link>
-          </div>
+          {/* <div className="block mt-2 text-xs text-center text-gray-600 w-hull"> */}
+          {/*  {t('login.tosDesc')} */}
+          {/*  &nbsp; */}
+          {/*  <Link */}
+          {/*    className='text-primary-600' */}
+          {/*    target='_blank' rel='noopener noreferrer' */}
+          {/*    href='https://dify.ai/terms' */}
+          {/*  >{t('login.tos')}</Link> */}
+          {/*  &nbsp;&&nbsp; */}
+          {/*  <Link */}
+          {/*    className='text-primary-600' */}
+          {/*    target='_blank' rel='noopener noreferrer' */}
+          {/*    href='https://dify.ai/privacy' */}
+          {/*  >{t('login.pp')}</Link> */}
+          {/* </div> */}
 
           {IS_CE_EDITION && <div className="w-hull text-center block mt-2 text-xs text-gray-600">
             {t('login.goToInit')}

@@ -38,7 +38,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/apps',
+        destination: '/brain/apps',
         permanent: false,
       },
     ]

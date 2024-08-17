@@ -1,6 +1,6 @@
 const translation = {
   pageTitle: '嗨，近來可好 👋',
-  welcome: '歡迎來到 Dify, 登入以繼續',
+  welcome: '歡迎來到 hz, 登入以繼續',
   email: '郵箱',
   emailPlaceholder: '輸入郵箱地址',
   password: '密碼',
@@ -19,7 +19,7 @@ const translation = {
   invitationCodePlaceholder: '輸入邀請碼',
   interfaceLanguage: '介面語言',
   timezone: '時區',
-  go: '跳轉至 Dify',
+  go: '跳轉至 hz',
   sendUsMail: '發封郵件介紹你自己，我們會盡快處理。',
   acceptPP: '我已閱讀並接受隱私政策',
   reset: '請執行以下命令重置密碼',
